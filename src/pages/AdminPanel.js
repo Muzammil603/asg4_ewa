@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import OrderHistory from '../components/OrderHistory';
+import OrderHistory from './OrderHistory';
 import { Navigate } from 'react-router-dom';
 
 function AdminPanel() {
@@ -19,8 +19,6 @@ function AdminPanel() {
       setProducts(JSON.parse(storedProducts));
     }
   }, []);
-
-  
 
   // Check if the user is a store manager
   const userRole = localStorage.getItem('userRole');
@@ -106,8 +104,8 @@ function AdminPanel() {
   };
 
   return (
-    <div className="p-4 max-w-3xl mx-auto">
-      <h1 className="text-3xl font-bold mb-4">Admin Panel</h1>
+    <div className="max-w-4xl mx-auto p-6 bg-gray-100 min-h-screen">
+      <h1 className="text-3xl font-bold mb-6">Admin Panel</h1>
       <h2 className="text-2xl font-semibold mb-4">Product Management</h2>
       <form
         onSubmit={selectedProduct ? handleUpdateProduct : handleAddProduct}

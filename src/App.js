@@ -12,14 +12,22 @@ import SalesmanPanel from './pages/SalesmanPanel';
 import CustomerRegistration from './pages/CustomerRegistration';
 import AuthPage from './pages/AuthPage';
 import LogoutConfirmation from './pages/LogoutConfirmation';
+import OrderHistory from './pages/OrderHistory';
 
 function App() {
   const [cartItems, setCartItems] = useState([]);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [customerId, setCustomerId] = useState('');
+  const [customerName, setCustomerName] = useState('');
 
   useEffect(() => {
     const userRole = localStorage.getItem('userRole');
+    const id = localStorage.getItem('userId');
+    const name = localStorage.getItem('userName');
+
     setIsLoggedIn(!!userRole);
+    setCustomerId(id || '');
+    setCustomerName(name || '');
   }, []);
 
   const addToCart = (product) => {
@@ -34,8 +42,11 @@ function App() {
   const handleLogout = () => {
     localStorage.removeItem('userRole');
     localStorage.removeItem('userId');
+    localStorage.removeItem('userName');
     setIsLoggedIn(false);
     setCartItems([]);
+    setCustomerId('');
+    setCustomerName('');
   };
 
   return (
@@ -44,49 +55,17 @@ function App() {
         {isLoggedIn && <Header handleLogout={handleLogout} setIsLoggedIn={setIsLoggedIn} />}
         <main className="flex-grow">
           <Routes>
-            <Route 
-              path="/" 
-              element={isLoggedIn ? <Home /> : <Navigate to="/auth" />} 
-            />
-            <Route 
-              path="/auth" 
-              element={!isLoggedIn ? <AuthPage setIsLoggedIn={setIsLoggedIn} /> : <Navigate to="/" />} 
-            />
-            <Route 
-              path="/logout" 
-              element={<LogoutConfirmation />} 
-            />
-            <Route 
-              path="/products" 
-              element={isLoggedIn ? <Products /> : <Navigate to="/auth" />} 
-            />
-            <Route
-              path="/products/:id"
-              element={isLoggedIn ? <ProductDetails addToCart={addToCart} /> : <Navigate to="/auth" />}
-            />
-            <Route
-              path="/cart"
-              element={isLoggedIn ? 
-                <Cart cartItems={cartItems} removeFromCart={removeFromCart} /> : 
-                <Navigate to="/auth" />
-              }
-            />
-            <Route 
-              path="/checkout" 
-              element={isLoggedIn ? <Checkout cartItems={cartItems} setCartItems={setCartItems} /> : <Navigate to="/auth" />} 
-            />
-            <Route 
-              path="/admin" 
-              element={isLoggedIn ? <AdminPanel /> : <Navigate to="/auth" />} 
-            />
-            <Route 
-              path="/salesman" 
-              element={isLoggedIn ? <SalesmanPanel /> : <Navigate to="/auth" />} 
-            />
-            <Route 
-              path="/register" 
-              element={isLoggedIn ? <CustomerRegistration /> : <Navigate to="/auth" />} 
-            />
+            <Route path="/" element={isLoggedIn ? <Home /> : <Navigate to="/auth" />} />
+            <Route path="/auth" element={!isLoggedIn ? <AuthPage setIsLoggedIn={setIsLoggedIn} setCustomerName={setCustomerName} /> : <Navigate to="/" />} />
+            <Route path="/logout" element={<LogoutConfirmation />} />
+            <Route path="/products" element={isLoggedIn ? <Products /> : <Navigate to="/auth" />} />
+            <Route path="/products/:id" element={isLoggedIn ? <ProductDetails addToCart={addToCart} /> : <Navigate to="/auth" />} />
+            <Route path="/cart" element={isLoggedIn ? <Cart cartItems={cartItems} removeFromCart={removeFromCart} /> : <Navigate to="/auth" />} />
+            <Route path="/checkout" element={isLoggedIn ? <Checkout cartItems={cartItems} customerName={customerName} /> : <Navigate to="/auth" />} />
+            <Route path="/admin" element={isLoggedIn ? <AdminPanel /> : <Navigate to="/auth" />} />
+            <Route path="/salesman" element={isLoggedIn ? <SalesmanPanel /> : <Navigate to="/auth" />} />
+            <Route path="/register" element={isLoggedIn ? <CustomerRegistration /> : <Navigate to="/auth" />} />
+            <Route path="/order-history" element={isLoggedIn ? <OrderHistory customerId={customerId} /> : <Navigate to="/auth" />} />
             <Route path="*" element={<Navigate to={isLoggedIn ? "/" : "/auth"} />} />
           </Routes>
         </main>
