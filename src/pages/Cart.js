@@ -1,9 +1,11 @@
 // src/pages/Cart.js
-import React from 'react';
+import React, { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CartItem from '../components/CartItem';
+import { CartContext } from '../context/CartContext';
 
-function Cart({ cartItems, removeFromCart }) {
+function Cart() {
+  const { cartItems, removeFromCart } = useContext(CartContext);
   const navigate = useNavigate();
 
   const handleCheckout = () => {
@@ -13,8 +15,8 @@ function Cart({ cartItems, removeFromCart }) {
   const calculateTotal = () => {
     return cartItems.reduce((total, item) => {
       let warrantyCost = 0;
-      if (item.warranty === '1year') warrantyCost = Number(item.price)/10;
-      if (item.warranty === '2year') warrantyCost = Number(item.price)/5;
+      if (item.warranty === '1year') warrantyCost = Number(item.price) / 10;
+      if (item.warranty === '2year') warrantyCost = Number(item.price) / 5;
       return total + Number(item.price) + warrantyCost;
     }, 0);
   };

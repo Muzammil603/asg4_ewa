@@ -1,6 +1,7 @@
+// src/pages/AdminPanel.js
 import React, { useState, useEffect } from 'react';
-import OrderHistory from './OrderHistory';
 import { Navigate } from 'react-router-dom';
+import OrderHistory from './OrderHistory';
 
 function AdminPanel() {
   const [products, setProducts] = useState([]);
@@ -10,26 +11,36 @@ function AdminPanel() {
     description: '',
     price: '',
     category: '',
+    accessories: []
+  });
+  const [accessoryData, setAccessoryData] = useState({
+    name: '',
+    price: ''
   });
 
   useEffect(() => {
-    // Fetch products from localStorage
-    const storedProducts = localStorage.getItem('products');
+    const storedProducts = JSON.parse(localStorage.getItem('products'));
     if (storedProducts) {
-      setProducts(JSON.parse(storedProducts));
+      setProducts(storedProducts);
+    } else {
+      fetch('/products.json')
+        .then(response => response.json())
+        .then(data => {
+          setProducts(data);
+          localStorage.setItem('products', JSON.stringify(data));
+        })
+        .catch(error => console.error('Error fetching products:', error));
     }
   }, []);
 
-  // Check if the user is a store manager
   const userRole = localStorage.getItem('userRole');
   if (userRole !== 'storeManager') {
-    // Redirect to the login page if the user is not a store manager
     return <Navigate to="/login" />;
   }
 
   const saveProducts = (updatedProducts) => {
-    localStorage.setItem('products', JSON.stringify(updatedProducts));
     setProducts(updatedProducts);
+    localStorage.setItem('products', JSON.stringify(updatedProducts));
   };
 
   const handleInputChange = (e) => {
@@ -39,11 +50,26 @@ function AdminPanel() {
     });
   };
 
+  const handleAccessoryInputChange = (e) => {
+    setAccessoryData({
+      ...accessoryData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleAddAccessory = () => {
+    setFormData({
+      ...formData,
+      accessories: [...formData.accessories, { ...accessoryData, id: Date.now().toString() }]
+    });
+    setAccessoryData({ name: '', price: '' });
+  };
+
   const handleAddProduct = (e) => {
     e.preventDefault();
     const newProduct = {
-      ...formData,
       id: Date.now().toString(),
+      ...formData,
     };
     const updatedProducts = [...products, newProduct];
     saveProducts(updatedProducts);
@@ -52,45 +78,34 @@ function AdminPanel() {
       description: '',
       price: '',
       category: '',
+      accessories: []
     });
-    setSelectedProduct(null);
   };
 
   const handleDeleteProduct = (productId) => {
-    const updatedProducts = products.filter((product) => product.id !== productId);
+    const updatedProducts = products.filter(product => product.id !== productId);
     saveProducts(updatedProducts);
-    setSelectedProduct(null);
   };
 
   const handleSelectProduct = (product) => {
     setSelectedProduct(product);
-    setFormData({
-      name: product.name,
-      description: product.description,
-      price: product.price,
-      category: product.category,
-    });
+    setFormData(product);
   };
 
   const handleUpdateProduct = (e) => {
     e.preventDefault();
-    const updatedProducts = products.map((product) => {
-      if (product.id === selectedProduct.id) {
-        return {
-          ...product,
-          ...formData,
-        };
-      }
-      return product;
-    });
+    const updatedProducts = products.map(product =>
+      product.id === selectedProduct.id ? formData : product
+    );
     saveProducts(updatedProducts);
+    setSelectedProduct(null);
     setFormData({
       name: '',
       description: '',
       price: '',
       category: '',
+      accessories: []
     });
-    setSelectedProduct(null);
   };
 
   const handleCancelEdit = () => {
@@ -100,6 +115,7 @@ function AdminPanel() {
       description: '',
       price: '',
       category: '',
+      accessories: []
     });
   };
 
@@ -163,6 +179,41 @@ function AdminPanel() {
             <option value="Smart Lightings">Smart Lightings</option>
             <option value="Smart Thermostats">Smart Thermostats</option>
           </select>
+        </div>
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700">Accessories:</label>
+          <div className="flex gap-2 mb-2">
+            <input
+              type="text"
+              name="name"
+              value={accessoryData.name}
+              onChange={handleAccessoryInputChange}
+              placeholder="Accessory Name"
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
+            />
+            <input
+              type="number"
+              name="price"
+              value={accessoryData.price}
+              onChange={handleAccessoryInputChange}
+              placeholder="Price"
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
+            />
+            <button
+              type="button"
+              onClick={handleAddAccessory}
+              className="px-4 py-2 bg-green-500 text-white rounded-md shadow-sm hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
+            >
+              Add Accessory
+            </button>
+          </div>
+          <ul className="list-disc pl-5">
+            {formData.accessories.map((accessory) => (
+              <li key={accessory.id} className="mb-2">
+                {accessory.name} (${accessory.price})
+              </li>
+            ))}
+          </ul>
         </div>
         <div className="flex gap-4">
           <button

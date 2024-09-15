@@ -21,6 +21,7 @@ function AuthPage({ setIsLoggedIn }) {
       if (user) {
         localStorage.setItem('userRole', user.role);
         localStorage.setItem('userId', user.id);
+        localStorage.setItem('userName', user.name);
         setIsLoggedIn(true);
         navigate('/');  // Redirect to home page after successful login
       } else {

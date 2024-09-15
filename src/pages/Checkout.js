@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 function Checkout({ cartItems }) {
   const [customerInfo, setCustomerInfo] = useState({
-    name: '',
+    name: localStorage.getItem('userName'),
     street: '',
     city: '',
     state: '',
@@ -27,6 +27,27 @@ function Checkout({ cartItems }) {
     { area: 'Bridgeport', zip: '60609' },
     { area: 'Old Town', zip: '60610' }
   ];
+
+  // Retrieve the logged-in user information from localStorage
+  useEffect(() => {
+    const users = JSON.parse(localStorage.getItem('users')) || []; // Get the users from localStorage
+    const loggedInUserName = localStorage.getItem('userName'); // Get the logged-in user's email from localStorage
+    console.log(loggedInUserName  );
+    // if (loggedInUserEmail) {
+    //   const loggedInUser = users.find(user => user.email === loggedInUserEmail); // Find the logged-in user
+
+    //   if (loggedInUser) {
+    //     setCustomerInfo(prevState => ({
+    //       ...prevState,
+    //       name: loggedInUser.name // Automatically populate the name
+    //     }));
+    //   } else {
+    //     console.error('Logged-in user not found.');
+    //   }
+    // } else {
+    //   console.error('No logged-in user in local storage.');
+    // }
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -79,8 +100,10 @@ function Checkout({ cartItems }) {
             type="text" 
             name="name" 
             value={customerInfo.name} 
+            
             onChange={handleChange} 
             className="w-full p-2 border border-gray-300 rounded-md"
+            readOnly // Make the name field read-only
             required 
           />
         </div>
@@ -191,6 +214,7 @@ function Checkout({ cartItems }) {
         </div>
         <button 
           type="submit" 
+       
           className="mt-4 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition duration-300"
         >
           Place Order

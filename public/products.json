@@ -1,87 +1,112 @@
 [
   {
-    "id": 1,
+    "id": "1",
     "name": "Smart Doorbell",
-    "description": "A smart doorbell with video functionality.",
-    "price": 149.99,
+    "description": "A smart doorbell with video capabilities.",
+    "price": "99.99",
     "category": "Smart Doorbells",
     "accessories": [
-      {
-        "id": 1,
-        "name": "Chime"
-      },
-      {
-        "id": 2,
-        "name": "Wedge Kit"
-      }
+      { "id": "a1", "name": "Extra Battery", "price": "19.99" },
+      { "id": "a2", "name": "Mounting Kit", "price": "9.99" }
     ]
   },
   {
-    "id": 2,
-    "name": "Smart Lock",
-    "description": "A keyless entry smart lock for your door.",
-    "price": 199.99,
+    "id": "2",
+    "name": "Smart Doorlock",
+    "description": "A smart doorlock with remote access.",
+    "price": "149.99",
     "category": "Smart Doorlocks",
     "accessories": [
-      {
-        "id": 3,
-        "name": "Deadbolt"
-      },
-      {
-        "id": 4,
-        "name": "Door Sensor"
-      }
+      { "id": "a3", "name": "Keypad", "price": "29.99" },
+      { "id": "a4", "name": "Remote Control", "price": "39.99" }
     ]
   },
   {
-    "id": 3,
+    "id": "3",
     "name": "Smart Speaker",
-    "description": "A voice-controlled smart speaker.",
-    "price": 99.99,
+    "description": "A smart speaker with voice assistant.",
+    "price": "49.99",
     "category": "Smart Speakers",
     "accessories": [
-      {
-        "id": 5,
-        "name": "Wall Mount"
-      },
-      {
-        "id": 6,
-        "name": "Battery Pack"
-      }
+      { "id": "a5", "name": "Wall Mount", "price": "14.99" },
+      { "id": "a6", "name": "Portable Battery Base", "price": "29.99" }
     ]
   },
   {
-    "id": 4,
+    "id": "4",
     "name": "Smart Light Bulb",
-    "description": "A Wi-Fi enabled LED light bulb.",
-    "price": 24.99,
+    "description": "A smart light bulb with adjustable brightness and color.",
+    "price": "19.99",
     "category": "Smart Lightings",
     "accessories": [
-      {
-        "id": 7,
-        "name": "Bulb Socket"
-      },
-      {
-        "id": 8,
-        "name": "Light Switch"
-      }
+      { "id": "a7", "name": "Dimmer Switch", "price": "24.99" },
+      { "id": "a8", "name": "Remote Control", "price": "14.99" }
     ]
   },
   {
-    "id": 5,
+    "id": "5",
     "name": "Smart Thermostat",
-    "description": "A programmable smart thermostat.",
-    "price": 129.99,
+    "description": "A smart thermostat with remote control and scheduling.",
+    "price": "129.99",
     "category": "Smart Thermostats",
     "accessories": [
-      {
-        "id": 9,
-        "name": "Temperature Sensor"
-      },
-      {
-        "id": 10,
-        "name": "Mounting Kit"
-      }
+      { "id": "a9", "name": "Temperature Sensor", "price": "39.99" },
+      { "id": "a10", "name": "Wall Plate", "price": "9.99" }
+    ]
+  },
+  {
+    "id": "6",
+    "name": "Smart Security Camera",
+    "description": "A smart security camera with night vision.",
+    "price": "79.99",
+    "category": "Smart Security",
+    "accessories": [
+      { "id": "a11", "name": "Extra Storage", "price": "19.99" },
+      { "id": "a12", "name": "Mounting Kit", "price": "9.99" }
+    ]
+  },
+  {
+    "id": "7",
+    "name": "Smart Plug",
+    "description": "A smart plug with energy monitoring.",
+    "price": "24.99",
+    "category": "Smart Plugs",
+    "accessories": [
+      { "id": "a13", "name": "Remote Control", "price": "14.99" },
+      { "id": "a14", "name": "Power Strip", "price": "29.99" }
+    ]
+  },
+  {
+    "id": "8",
+    "name": "Smart Light Switch",
+    "description": "A smart light switch with touch control.",
+    "price": "34.99",
+    "category": "Smart Lightings",
+    "accessories": [
+      { "id": "a15", "name": "Remote Control", "price": "14.99" },
+      { "id": "a16", "name": "Wall Plate", "price": "9.99" }
+    ]
+  },
+  {
+    "id": "9",
+    "name": "Smart Garage Door Opener",
+    "description": "A smart garage door opener with remote access.",
+    "price": "89.99",
+    "category": "Smart Home",
+    "accessories": [
+      { "id": "a17", "name": "Remote Control", "price": "19.99" },
+      { "id": "a18", "name": "Battery Backup", "price": "29.99" }
+    ]
+  },
+  {
+    "id": "10",
+    "name": "Smart Smoke Detector",
+    "description": "A smart smoke detector with CO detection.",
+    "price": "59.99",
+    "category": "Smart Safety",
+    "accessories": [
+      { "id": "a19", "name": "Battery Pack", "price": "14.99" },
+      { "id": "a20", "name": "Mounting Kit", "price": "9.99" }
     ]
   }
 ]
