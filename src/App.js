@@ -40,54 +40,56 @@ function App() {
 
   return (
     <Router>
-      <div className="App">
+      <div className="flex flex-col min-h-screen">
         {isLoggedIn && <Header handleLogout={handleLogout} setIsLoggedIn={setIsLoggedIn} />}
-        <Routes>
-          <Route 
-            path="/" 
-            element={isLoggedIn ? <Home /> : <Navigate to="/auth" />} 
-          />
-          <Route 
-            path="/auth" 
-            element={!isLoggedIn ? <AuthPage setIsLoggedIn={setIsLoggedIn} /> : <Navigate to="/" />} 
-          />
-          <Route 
-            path="/logout" 
-            element={<LogoutConfirmation />} 
-          />
-          <Route 
-            path="/products" 
-            element={isLoggedIn ? <Products /> : <Navigate to="/auth" />} 
-          />
-          <Route
-            path="/products/:id"
-            element={isLoggedIn ? <ProductDetails addToCart={addToCart} /> : <Navigate to="/auth" />}
-          />
-          <Route
-            path="/cart"
-            element={isLoggedIn ? 
-              <Cart cartItems={cartItems} removeFromCart={removeFromCart} /> : 
-              <Navigate to="/auth" />
-            }
-          />
-          <Route 
-            path="/checkout" 
-            element={isLoggedIn ? <Checkout cartItems={cartItems} setCartItems={setCartItems} /> : <Navigate to="/auth" />} 
-          />
-          <Route 
-            path="/admin" 
-            element={isLoggedIn ? <AdminPanel /> : <Navigate to="/auth" />} 
-          />
-          <Route 
-            path="/salesman" 
-            element={isLoggedIn ? <SalesmanPanel /> : <Navigate to="/auth" />} 
-          />
-          <Route 
-            path="/register" 
-            element={isLoggedIn ? <CustomerRegistration /> : <Navigate to="/auth" />} 
-          />
-          <Route path="*" element={<Navigate to={isLoggedIn ? "/" : "/auth"} />} />
-        </Routes>
+        <main className="flex-grow">
+          <Routes>
+            <Route 
+              path="/" 
+              element={isLoggedIn ? <Home /> : <Navigate to="/auth" />} 
+            />
+            <Route 
+              path="/auth" 
+              element={!isLoggedIn ? <AuthPage setIsLoggedIn={setIsLoggedIn} /> : <Navigate to="/" />} 
+            />
+            <Route 
+              path="/logout" 
+              element={<LogoutConfirmation />} 
+            />
+            <Route 
+              path="/products" 
+              element={isLoggedIn ? <Products /> : <Navigate to="/auth" />} 
+            />
+            <Route
+              path="/products/:id"
+              element={isLoggedIn ? <ProductDetails addToCart={addToCart} /> : <Navigate to="/auth" />}
+            />
+            <Route
+              path="/cart"
+              element={isLoggedIn ? 
+                <Cart cartItems={cartItems} removeFromCart={removeFromCart} /> : 
+                <Navigate to="/auth" />
+              }
+            />
+            <Route 
+              path="/checkout" 
+              element={isLoggedIn ? <Checkout cartItems={cartItems} setCartItems={setCartItems} /> : <Navigate to="/auth" />} 
+            />
+            <Route 
+              path="/admin" 
+              element={isLoggedIn ? <AdminPanel /> : <Navigate to="/auth" />} 
+            />
+            <Route 
+              path="/salesman" 
+              element={isLoggedIn ? <SalesmanPanel /> : <Navigate to="/auth" />} 
+            />
+            <Route 
+              path="/register" 
+              element={isLoggedIn ? <CustomerRegistration /> : <Navigate to="/auth" />} 
+            />
+            <Route path="*" element={<Navigate to={isLoggedIn ? "/" : "/auth"} />} />
+          </Routes>
+        </main>
         <Footer />
       </div>
     </Router>

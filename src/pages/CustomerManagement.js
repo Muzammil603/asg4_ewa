@@ -96,11 +96,12 @@ function CustomerManagement() {
   };
 
   return (
-    <div>
-      <h2>Customer Management</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="name">Name:</label>
+    <div className="p-4 max-w-2xl mx-auto">
+      <h2 className="text-2xl font-bold mb-4">Customer Management</h2>
+      
+      <form onSubmit={handleSubmit} className="mb-6 space-y-4">
+        <div className="flex flex-col space-y-2">
+          <label htmlFor="name" className="text-sm font-medium">Name:</label>
           <input
             type="text"
             id="name"
@@ -108,10 +109,11 @@ function CustomerManagement() {
             value={formData.name}
             onChange={handleInputChange}
             required
+            className="border border-gray-300 rounded-md px-3 py-2 text-sm"
           />
         </div>
-        <div>
-          <label htmlFor="email">Email:</label>
+        <div className="flex flex-col space-y-2">
+          <label htmlFor="email" className="text-sm font-medium">Email:</label>
           <input
             type="email"
             id="email"
@@ -119,10 +121,11 @@ function CustomerManagement() {
             value={formData.email}
             onChange={handleInputChange}
             required
+            className="border border-gray-300 rounded-md px-3 py-2 text-sm"
           />
         </div>
-        <div>
-          <label htmlFor="password">Password:</label>
+        <div className="flex flex-col space-y-2">
+          <label htmlFor="password" className="text-sm font-medium">Password:</label>
           <input
             type="password"
             id="password"
@@ -131,31 +134,52 @@ function CustomerManagement() {
             onChange={handleInputChange}
             required={!selectedCustomer}
             placeholder={selectedCustomer ? "Leave blank to keep current password" : ""}
+            className="border border-gray-300 rounded-md px-3 py-2 text-sm"
           />
         </div>
-        <button type="submit">
-          {selectedCustomer ? 'Update Customer' : 'Add Customer'}
-        </button>
-        {selectedCustomer && (
-          <button type="button" onClick={() => {
-            setSelectedCustomer(null);
-            clearForm();
-          }}>
-            Cancel
+        <div className="flex space-x-2">
+          <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
+            {selectedCustomer ? 'Update Customer' : 'Add Customer'}
           </button>
-        )}
+          {selectedCustomer && (
+            <button 
+              type="button" 
+              onClick={() => {
+                setSelectedCustomer(null);
+                clearForm();
+              }}
+              className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600"
+            >
+              Cancel
+            </button>
+          )}
+        </div>
       </form>
 
-      <h3>Customer List</h3>
+      <h3 className="text-xl font-semibold mb-2">Customer List</h3>
       {customers.length === 0 ? (
-        <p>No customers found.</p>
+        <p className="text-gray-500">No customers found.</p>
       ) : (
-        <ul>
+        <ul className="space-y-2">
           {customers.map((customer) => (
-            <li key={customer.id}>
-              <strong>{customer.name}</strong> - {customer.email}
-              <button onClick={() => handleSelectCustomer(customer)}>Edit</button>
-              <button onClick={() => handleDeleteCustomer(customer.id)}>Delete</button>
+            <li key={customer.id} className="flex items-center justify-between p-2 border border-gray-200 rounded-md">
+              <div>
+                <strong className="text-lg">{customer.name}</strong> - {customer.email}
+              </div>
+              <div>
+                <button 
+                  onClick={() => handleSelectCustomer(customer)}
+                  className="bg-yellow-500 text-white px-3 py-1 rounded-md hover:bg-yellow-600 mr-2"
+                >
+                  Edit
+                </button>
+                <button 
+                  onClick={() => handleDeleteCustomer(customer.id)}
+                  className="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600"
+                >
+                  Delete
+                </button>
+              </div>
             </li>
           ))}
         </ul>

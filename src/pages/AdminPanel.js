@@ -106,13 +106,15 @@ function AdminPanel() {
   };
 
   return (
-    <div>
-      <h1>Admin Panel</h1>
-      <h2>Product Management</h2>
-      <form onSubmit={selectedProduct ? handleUpdateProduct : handleAddProduct}>
-        {/* Form fields */}
-        <div>
-          <label htmlFor="name">Name:</label>
+    <div className="p-4 max-w-3xl mx-auto">
+      <h1 className="text-3xl font-bold mb-4">Admin Panel</h1>
+      <h2 className="text-2xl font-semibold mb-4">Product Management</h2>
+      <form
+        onSubmit={selectedProduct ? handleUpdateProduct : handleAddProduct}
+        className="bg-white shadow-md rounded-lg p-6 mb-6"
+      >
+        <div className="mb-4">
+          <label htmlFor="name" className="block text-sm font-medium text-gray-700">Name:</label>
           <input
             type="text"
             id="name"
@@ -120,20 +122,22 @@ function AdminPanel() {
             value={formData.name}
             onChange={handleInputChange}
             required
+            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
           />
         </div>
-        <div>
-          <label htmlFor="description">Description:</label>
+        <div className="mb-4">
+          <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description:</label>
           <textarea
             id="description"
             name="description"
             value={formData.description}
             onChange={handleInputChange}
             required
+            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
           ></textarea>
         </div>
-        <div>
-          <label htmlFor="price">Price:</label>
+        <div className="mb-4">
+          <label htmlFor="price" className="block text-sm font-medium text-gray-700">Price:</label>
           <input
             type="number"
             id="price"
@@ -141,16 +145,18 @@ function AdminPanel() {
             value={formData.price}
             onChange={handleInputChange}
             required
+            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
           />
         </div>
-        <div>
-          <label htmlFor="category">Category:</label>
+        <div className="mb-4">
+          <label htmlFor="category" className="block text-sm font-medium text-gray-700">Category:</label>
           <select
             id="category"
             name="category"
             value={formData.category}
             onChange={handleInputChange}
             required
+            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
           >
             <option value="">Select a category</option>
             <option value="Smart Doorbells">Smart Doorbells</option>
@@ -160,20 +166,45 @@ function AdminPanel() {
             <option value="Smart Thermostats">Smart Thermostats</option>
           </select>
         </div>
-        <button type="submit">{selectedProduct ? 'Update Product' : 'Add Product'}</button>
-        {selectedProduct && (
-          <button type="button" onClick={handleCancelEdit}>
-            Cancel
+        <div className="flex gap-4">
+          <button
+            type="submit"
+            className="px-4 py-2 bg-blue-500 text-white rounded-md shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            {selectedProduct ? 'Update Product' : 'Add Product'}
           </button>
-        )}
+          {selectedProduct && (
+            <button
+              type="button"
+              onClick={handleCancelEdit}
+              className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md shadow-sm hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-300"
+            >
+              Cancel
+            </button>
+          )}
+        </div>
       </form>
-      <h2>Product List</h2>
-      <ul>
+      <h2 className="text-2xl font-semibold mb-4">Product List</h2>
+      <ul className="list-disc pl-5">
         {products.map((product) => (
-          <li key={product.id}>
-            <strong>{product.name}</strong>
-            <button onClick={() => handleSelectProduct(product)}>Edit</button>
-            <button onClick={() => handleDeleteProduct(product.id)}>Delete</button>
+          <li key={product.id} className="mb-2 flex justify-between items-center">
+            <div>
+              <strong>{product.name}</strong>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => handleSelectProduct(product)}
+                className="px-2 py-1 bg-yellow-500 text-white rounded-md shadow-sm hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+              >
+                Edit
+              </button>
+              <button
+                onClick={() => handleDeleteProduct(product.id)}
+                className="px-2 py-1 bg-red-500 text-white rounded-md shadow-sm hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500"
+              >
+                Delete
+              </button>
+            </div>
           </li>
         ))}
       </ul>

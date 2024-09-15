@@ -183,14 +183,15 @@ function OrderManagement() {
     : orders;
 
   return (
-    <div>
-      <h2>Order Management</h2>
-      <div>
-        <label htmlFor="customerFilter">Filter by Customer: </label>
+    <div className="p-4">
+      <h2 className="text-2xl font-bold mb-4">Order Management</h2>
+      <div className="mb-4">
+        <label htmlFor="customerFilter" className="block text-lg font-medium mb-2">Filter by Customer:</label>
         <select
           id="customerFilter"
           value={selectedCustomer}
           onChange={handleCustomerFilter}
+          className="p-2 border border-gray-300 rounded-md"
         >
           <option value="">All Customers</option>
           {customers.map((customer) => (
@@ -199,15 +200,16 @@ function OrderManagement() {
         </select>
       </div>
 
-      <form onSubmit={handleOrderSubmit}>
-        <h3>{selectedOrder ? 'Edit Order' : 'Add New Order'}</h3>
-        <div>
-          <label htmlFor="status">Status:</label>
+      <form onSubmit={handleOrderSubmit} className="bg-white p-4 border border-gray-300 rounded-md shadow-md">
+        <h3 className="text-xl font-semibold mb-4">{selectedOrder ? 'Edit Order' : 'Add New Order'}</h3>
+        <div className="mb-4">
+          <label htmlFor="status" className="block text-lg font-medium mb-2">Status:</label>
           <select
             id="status"
             name="status"
             value={orderFormData.status}
             onChange={(e) => setOrderFormData(prevData => ({...prevData, status: e.target.value}))}
+            className="p-2 border border-gray-300 rounded-md"
           >
             <option value="Pending">Pending</option>
             <option value="Processing">Processing</option>
@@ -215,8 +217,8 @@ function OrderManagement() {
             <option value="Delivered">Delivered</option>
           </select>
         </div>
-        <div>
-          <label htmlFor="address">Address:</label>
+        <div className="mb-4">
+          <label htmlFor="address" className="block text-lg font-medium mb-2">Address:</label>
           <input
             type="text"
             id="address"
@@ -224,10 +226,11 @@ function OrderManagement() {
             value={orderFormData.address}
             onChange={(e) => setOrderFormData(prevData => ({...prevData, address: e.target.value}))}
             required
+            className="p-2 border border-gray-300 rounded-md w-full"
           />
         </div>
-        <div>
-          <label htmlFor="creditCard">Credit Card:</label>
+        <div className="mb-4">
+          <label htmlFor="creditCard" className="block text-lg font-medium mb-2">Credit Card:</label>
           <input
             type="text"
             id="creditCard"
@@ -235,14 +238,16 @@ function OrderManagement() {
             value={orderFormData.creditCard}
             onChange={(e) => setOrderFormData(prevData => ({...prevData, creditCard: e.target.value}))}
             required
+            className="p-2 border border-gray-300 rounded-md w-full"
           />
         </div>
         {orderFormData.items.map((item, index) => (
-          <div key={index}>
+          <div key={index} className="flex items-center mb-2">
             <select
               value={item.productId}
               onChange={(e) => handleItemChange(index, 'productId', e.target.value)}
               required
+              className="p-2 border border-gray-300 rounded-md mr-2"
             >
               <option value="">Select a product</option>
               {products.map((product) => (
@@ -255,6 +260,7 @@ function OrderManagement() {
               onChange={(e) => handleItemChange(index, 'quantity', e.target.value)}
               placeholder="Quantity"
               required
+              className="p-2 border border-gray-300 rounded-md w-20 mr-2"
             />
             <input
               type="number"
@@ -262,64 +268,76 @@ function OrderManagement() {
               onChange={(e) => handleItemChange(index, 'price', e.target.value)}
               placeholder="Price"
               required
+              className="p-2 border border-gray-300 rounded-md w-20"
+              disabled
             />
-            <button type="button" onClick={() => handleRemoveItem(index)}>Remove Item</button>
+            <button
+              type="button"
+              onClick={() => handleRemoveItem(index)}
+              className="ml-2 bg-red-500 text-white px-3 py-1 rounded-md"
+            >
+              Remove
+            </button>
           </div>
         ))}
-        <button type="button" onClick={handleAddItem}>Add Item</button>
-        <div>
-          <p>Subtotal: ${orderFormData.subtotal.toFixed(2)}</p>
-          <p>Tax (12.5%): ${orderFormData.tax.toFixed(2)}</p>
-          <p>Total: ${orderFormData.total.toFixed(2)}</p>
+        <button
+          type="button"
+          onClick={handleAddItem}
+          className="mb-4 bg-blue-500 text-white px-4 py-2 rounded-md"
+        >
+          Add Item
+        </button>
+        <div className="mb-4">
+          <p className="font-medium">Subtotal: ${orderFormData.subtotal.toFixed(2)}</p>
+          <p className="font-medium">Tax: ${orderFormData.tax.toFixed(2)}</p>
+          <p className="font-medium">Total: ${orderFormData.total.toFixed(2)}</p>
         </div>
-        <button type="submit">{selectedOrder ? 'Update Order' : 'Add Order'}</button>
-        {selectedOrder && (
-          <button type="button" onClick={() => {
-            setSelectedOrder(null);
-            clearOrderForm();
-          }}>
-            Cancel
-          </button>
-        )}
+        <button
+          type="submit"
+          className="bg-green-500 text-white px-4 py-2 rounded-md"
+        >
+          {selectedOrder ? 'Update Order' : 'Submit Order'}
+        </button>
       </form>
 
-      <h3>Order List</h3>
-      {filteredOrders.length === 0 ? (
-        <p>No orders found.</p>
-      ) : (
-        <ul>
-          {filteredOrders.map((order) => (
-            <li key={order.id}>
-              Customer: {customers.find(c => c.id === order.customerId)?.name || 'Unknown'}
-              <br />
-              Status: {order.status}
-              <br />
-              Date: {new Date(order.date).toLocaleString()}
-              <br />
-              Address: {order.address}
-              <br />
-              Credit Card: {order.creditCard}
-              <ul>
-                {order.items && order.items.map((item, index) => {
-                  const product = products.find(p => p.id === item.productId);
-                  return (
-                    <li key={index}>
-                      Product: {product ? product.name : 'Unknown'} - 
-                      Quantity: {item.quantity} - 
-                      Price: ${item.price}
-                    </li>
-                  );
-                })}
-              </ul>
-              <p>Subtotal: ${order.subtotal?.toFixed(2)}</p>
-              <p>Tax (12.5%): ${order.tax?.toFixed(2)}</p>
-              <p>Total: ${order.total?.toFixed(2)}</p>
-              <button onClick={() => handleSelectOrder(order)}>Edit</button>
-              <button onClick={() => handleDeleteOrder(order.id)}>Delete</button>
-            </li>
-          ))}
-        </ul>
-      )}
+      <div className="mt-6">
+        <h3 className="text-xl font-semibold mb-4">Order List</h3>
+        <table className="min-w-full bg-white border border-gray-300 rounded-md shadow-md">
+          <thead>
+            <tr className="bg-gray-100 border-b">
+              <th className="p-2">ID</th>
+              <th className="p-2">Customer</th>
+              <th className="p-2">Status</th>
+              <th className="p-2">Date</th>
+              <th className="p-2">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredOrders.map((order) => (
+              <tr key={order.id} className="border-b">
+                <td className="p-2">{order.id}</td>
+                <td className="p-2">{customers.find(c => c.id === order.customerId)?.name}</td>
+                <td className="p-2">{order.status}</td>
+                <td className="p-2">{new Date(order.date).toLocaleDateString()}</td>
+                <td className="p-2">
+                  <button
+                    onClick={() => handleSelectOrder(order)}
+                    className="bg-yellow-500 text-white px-2 py-1 rounded-md mr-2"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDeleteOrder(order.id)}
+                    className="bg-red-500 text-white px-2 py-1 rounded-md"
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

@@ -6,7 +6,7 @@ function Products() {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    // Fetch products from AdminPanel component
+    // Fetch products from localStorage
     const storedProducts = JSON.parse(localStorage.getItem('products'));
     if (storedProducts) {
       setProducts(storedProducts);
@@ -14,11 +14,15 @@ function Products() {
   }, []);
 
   return (
-    <div>
-      <h1>Products</h1>
-      <div className="product-grid">
+    <div className="p-4">
+      <h1 className="text-3xl font-bold mb-6">Products</h1>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {products.map(product => (
-          <Link to={`/products/${product.id}`} key={product.id}>
+          <Link 
+            to={`/products/${product.id}`} 
+            key={product.id}
+            className="block bg-white border border-gray-300 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
+          >
             <ProductCard product={product} />
           </Link>
         ))}
