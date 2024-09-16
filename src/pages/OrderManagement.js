@@ -2,92 +2,46 @@ import React, { useState, useEffect } from 'react';
 
 function OrderManagement() {
   const [orders, setOrders] = useState([]);
-  const [customers, setCustomers] = useState([]);
+  const [users, setUsers] = useState([]);
   const [products, setProducts] = useState([]);
-  const [selectedCustomer, setSelectedCustomer] = useState('');
+  const [selectedUser, setSelectedUser] = useState('');
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [orderFormData, setOrderFormData] = useState({
-    customerId: '',
-    items: [],
-    status: 'Pending',
-    address: '',
+    name: '',
+    street: '',
+    city: '',
+    state: '',
+    zipCode: '',
     creditCard: '',
-    subtotal: 0,
-    tax: 0,
-    total: 0
+    items: []
   });
 
   useEffect(() => {
-    loadOrders();
-    loadCustomers();
-    loadProducts();
+    loadData();
   }, []);
 
-  const loadOrders = () => {
-    const storedOrders = localStorage.getItem('orders');
-    if (storedOrders) {
-      try {
-        const parsedOrders = JSON.parse(storedOrders);
-        console.log('Loaded orders:', parsedOrders);
-        setOrders(parsedOrders);
-      } catch (error) {
-        console.error('Error parsing orders:', error);
-        setOrders([]);
-      }
-    } else {
-      console.log('No orders found in localStorage');
-      setOrders([]);
-    }
+  const loadData = () => {
+    const storedOrders = JSON.parse(localStorage.getItem('orders')) || [];
+    const storedUsers = JSON.parse(localStorage.getItem('users')) || [];
+    const storedProducts = JSON.parse(localStorage.getItem('products')) || [];
+
+    setOrders(storedOrders);
+    setUsers(storedUsers);
+    setProducts(storedProducts);
   };
 
-  const loadCustomers = () => {
-    const storedUsers = localStorage.getItem('users');
-    if (storedUsers) {
-      try {
-        const parsedUsers = JSON.parse(storedUsers);
-        const customerUsers = parsedUsers.filter(user => user.role === 'customer');
-        console.log('Loaded customers:', customerUsers);
-        setCustomers(customerUsers);
-      } catch (error) {
-        console.error('Error parsing users:', error);
-        setCustomers([]);
-      }
-    } else {
-      console.log('No users found in localStorage');
-      setCustomers([]);
-    }
+  const saveData = (key, data) => {
+    localStorage.setItem(key, JSON.stringify(data));
   };
 
-  const loadProducts = () => {
-    const storedProducts = localStorage.getItem('products');
-    if (storedProducts) {
-      try {
-        const parsedProducts = JSON.parse(storedProducts);
-        console.log('Loaded products:', parsedProducts);
-        setProducts(parsedProducts);
-      } catch (error) {
-        console.error('Error parsing products:', error);
-        setProducts([]);
-      }
-    } else {
-      console.log('No products found in localStorage');
-      setProducts([]);
-    }
-  };
-
-  const saveOrders = (updatedOrders) => {
-    localStorage.setItem('orders', JSON.stringify(updatedOrders));
-    setOrders(updatedOrders);
-  };
-
-  const handleCustomerFilter = (e) => {
-    setSelectedCustomer(e.target.value);
+  const handleUserFilter = (e) => {
+    setSelectedUser(e.target.value);
   };
 
   const handleAddItem = () => {
     setOrderFormData(prevData => ({
       ...prevData,
-      items: [...prevData.items, { productId: '', quantity: 1, price: 0 }],
+      items: [...prevData.items, { id: '', quantity: 1 }],
     }));
   };
 
@@ -102,24 +56,9 @@ function OrderManagement() {
     setOrderFormData(prevData => {
       const updatedItems = [...prevData.items];
       updatedItems[index] = { ...updatedItems[index], [field]: value };
-      
-      if (field === 'productId') {
-        const selectedProduct = products.find(p => p.id === value);
-        if (selectedProduct) {
-          updatedItems[index].price = selectedProduct.price;
-        }
-      }
-      
-      const subtotal = updatedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-      const tax = subtotal * 0.125; // 12.5% tax
-      const total = subtotal + tax;
-
       return { 
         ...prevData, 
-        items: updatedItems,
-        subtotal: subtotal,
-        tax: tax,
-        total: total
+        items: updatedItems
       };
     });
   };
@@ -128,74 +67,66 @@ function OrderManagement() {
     e.preventDefault();
     if (selectedOrder) {
       const updatedOrders = orders.map((order) =>
-        order.id === selectedOrder.id ? { ...order, ...orderFormData } : order
+        order.name === selectedOrder.name ? { ...order, ...orderFormData } : order
       );
-      saveOrders(updatedOrders);
+      saveData('orders', updatedOrders);
+      setOrders(updatedOrders);
     } else {
       const newOrder = {
-        id: Date.now().toString(),
         ...orderFormData,
-        customerId: selectedCustomer,
-        date: new Date().toISOString(),
+        name: selectedUser,
       };
-      saveOrders([...orders, newOrder]);
+      const updatedOrders = [...orders, newOrder];
+      saveData('orders', updatedOrders);
+      setOrders(updatedOrders);
     }
     clearOrderForm();
     setSelectedOrder(null);
   };
 
-  const handleDeleteOrder = (orderId) => {
-    const updatedOrders = orders.filter((order) => order.id !== orderId);
-    saveOrders(updatedOrders);
+  const handleDeleteOrder = (orderName) => {
+    const updatedOrders = orders.filter((order) => order.name !== orderName);
+    saveData('orders', updatedOrders);
+    setOrders(updatedOrders);
     setSelectedOrder(null);
     clearOrderForm();
   };
 
   const handleSelectOrder = (order) => {
     setSelectedOrder(order);
-    setOrderFormData({
-      customerId: order.customerId,
-      items: order.items || [],
-      status: order.status || 'Pending',
-      address: order.address || '',
-      creditCard: order.creditCard || '',
-      subtotal: order.subtotal || 0,
-      tax: order.tax || 0,
-      total: order.total || 0
-    });
+    setOrderFormData(order);
   };
 
   const clearOrderForm = () => {
     setOrderFormData({
-      customerId: '',
-      items: [],
-      status: 'Pending',
-      address: '',
+      name: '',
+      street: '',
+      city: '',
+      state: '',
+      zipCode: '',
       creditCard: '',
-      subtotal: 0,
-      tax: 0,
-      total: 0
+      items: []
     });
   };
 
-  const filteredOrders = selectedCustomer
-    ? orders.filter(order => order.customerId === selectedCustomer)
+  const filteredOrders = selectedUser
+    ? orders.filter(order => order.name === selectedUser)
     : orders;
 
   return (
     <div className="p-4">
       <h2 className="text-2xl font-bold mb-4">Order Management</h2>
       <div className="mb-4">
-        <label htmlFor="customerFilter" className="block text-lg font-medium mb-2">Filter by Customer:</label>
+        <label htmlFor="userFilter" className="block text-lg font-medium mb-2">Filter by User:</label>
         <select
-          id="customerFilter"
-          value={selectedCustomer}
-          onChange={handleCustomerFilter}
+          id="userFilter"
+          value={selectedUser}
+          onChange={handleUserFilter}
           className="p-2 border border-gray-300 rounded-md"
         >
-          <option value="">All Customers</option>
-          {customers.map((customer) => (
-            <option key={customer.id} value={customer.id}>{customer.name}</option>
+          <option value="">All Users</option>
+          {users.map((user) => (
+            <option key={user.id} value={user.name}>{user.name}</option>
           ))}
         </select>
       </div>
@@ -203,28 +134,49 @@ function OrderManagement() {
       <form onSubmit={handleOrderSubmit} className="bg-white p-4 border border-gray-300 rounded-md shadow-md">
         <h3 className="text-xl font-semibold mb-4">{selectedOrder ? 'Edit Order' : 'Add New Order'}</h3>
         <div className="mb-4">
-          <label htmlFor="status" className="block text-lg font-medium mb-2">Status:</label>
-          <select
-            id="status"
-            name="status"
-            value={orderFormData.status}
-            onChange={(e) => setOrderFormData(prevData => ({...prevData, status: e.target.value}))}
-            className="p-2 border border-gray-300 rounded-md"
-          >
-            <option value="Pending">Pending</option>
-            <option value="Processing">Processing</option>
-            <option value="Shipped">Shipped</option>
-            <option value="Delivered">Delivered</option>
-          </select>
-        </div>
-        <div className="mb-4">
-          <label htmlFor="address" className="block text-lg font-medium mb-2">Address:</label>
+          <label htmlFor="street" className="block text-lg font-medium mb-2">Street:</label>
           <input
             type="text"
-            id="address"
-            name="address"
-            value={orderFormData.address}
-            onChange={(e) => setOrderFormData(prevData => ({...prevData, address: e.target.value}))}
+            id="street"
+            name="street"
+            value={orderFormData.street}
+            onChange={(e) => setOrderFormData(prevData => ({...prevData, street: e.target.value}))}
+            required
+            className="p-2 border border-gray-300 rounded-md w-full"
+          />
+        </div>
+        <div className="mb-4">
+          <label htmlFor="city" className="block text-lg font-medium mb-2">City:</label>
+          <input
+            type="text"
+            id="city"
+            name="city"
+            value={orderFormData.city}
+            onChange={(e) => setOrderFormData(prevData => ({...prevData, city: e.target.value}))}
+            required
+            className="p-2 border border-gray-300 rounded-md w-full"
+          />
+        </div>
+        <div className="mb-4">
+          <label htmlFor="state" className="block text-lg font-medium mb-2">State:</label>
+          <input
+            type="text"
+            id="state"
+            name="state"
+            value={orderFormData.state}
+            onChange={(e) => setOrderFormData(prevData => ({...prevData, state: e.target.value}))}
+            required
+            className="p-2 border border-gray-300 rounded-md w-full"
+          />
+        </div>
+        <div className="mb-4">
+          <label htmlFor="zipCode" className="block text-lg font-medium mb-2">Zip Code:</label>
+          <input
+            type="text"
+            id="zipCode"
+            name="zipCode"
+            value={orderFormData.zipCode}
+            onChange={(e) => setOrderFormData(prevData => ({...prevData, zipCode: e.target.value}))}
             required
             className="p-2 border border-gray-300 rounded-md w-full"
           />
@@ -244,8 +196,8 @@ function OrderManagement() {
         {orderFormData.items.map((item, index) => (
           <div key={index} className="flex items-center mb-2">
             <select
-              value={item.productId}
-              onChange={(e) => handleItemChange(index, 'productId', e.target.value)}
+              value={item.id}
+              onChange={(e) => handleItemChange(index, 'id', e.target.value)}
               required
               className="p-2 border border-gray-300 rounded-md mr-2"
             >
@@ -261,15 +213,6 @@ function OrderManagement() {
               placeholder="Quantity"
               required
               className="p-2 border border-gray-300 rounded-md w-20 mr-2"
-            />
-            <input
-              type="number"
-              value={item.price}
-              onChange={(e) => handleItemChange(index, 'price', e.target.value)}
-              placeholder="Price"
-              required
-              className="p-2 border border-gray-300 rounded-md w-20"
-              disabled
             />
             <button
               type="button"
@@ -287,11 +230,6 @@ function OrderManagement() {
         >
           Add Item
         </button>
-        <div className="mb-4">
-          <p className="font-medium">Subtotal: ${orderFormData.subtotal.toFixed(2)}</p>
-          <p className="font-medium">Tax: ${orderFormData.tax.toFixed(2)}</p>
-          <p className="font-medium">Total: ${orderFormData.total.toFixed(2)}</p>
-        </div>
         <button
           type="submit"
           className="bg-green-500 text-white px-4 py-2 rounded-md"
@@ -305,37 +243,48 @@ function OrderManagement() {
         <table className="min-w-full bg-white border border-gray-300 rounded-md shadow-md">
           <thead>
             <tr className="bg-gray-100 border-b">
-              <th className="p-2">ID</th>
               <th className="p-2">Customer</th>
-              <th className="p-2">Status</th>
-              <th className="p-2">Date</th>
+              <th className="p-2">Address</th>
+              <th className="p-2">Items</th>
               <th className="p-2">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {filteredOrders.map((order) => (
-              <tr key={order.id} className="border-b">
-                <td className="p-2">{order.id}</td>
-                <td className="p-2">{customers.find(c => c.id === order.customerId)?.name}</td>
-                <td className="p-2">{order.status}</td>
-                <td className="p-2">{new Date(order.date).toLocaleDateString()}</td>
-                <td className="p-2">
-                  <button
-                    onClick={() => handleSelectOrder(order)}
-                    className="bg-yellow-500 text-white px-2 py-1 rounded-md mr-2"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDeleteOrder(order.id)}
-                    className="bg-red-500 text-white px-2 py-1 rounded-md"
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
+  {filteredOrders.map((order) => (
+    <tr key={order.confirmationNumber} className="border-b">
+      <td className="p-2">{order.name}</td>
+      <td className="p-2">{order.street}, {order.city}, {order.state} {order.zipCode}</td>
+      <td className="p-2">
+        {order.cartItems && Array.isArray(order.cartItems) ? (
+          order.cartItems.map((item) => {
+            const product = products.find((p) => p.id === item.id);
+            return (
+              <div key={item.id}>
+                {product?.name} x {item.quantity}
+              </div>
+            );
+          })
+        ) : (
+          <div>No items found</div>
+        )}
+      </td>
+      <td className="p-2">
+        <button
+          onClick={() => handleSelectOrder(order)}
+          className="bg-yellow-500 text-white px-2 py-1 rounded-md mr-2"
+        >
+          Edit
+        </button>
+        <button
+          onClick={() => handleDeleteOrder(order.confirmationNumber)}
+          className="bg-red-500 text-white px-2 py-1 rounded-md"
+        >
+          Delete
+        </button>
+      </td>
+    </tr>
+  ))}
+</tbody>
         </table>
       </div>
     </div>

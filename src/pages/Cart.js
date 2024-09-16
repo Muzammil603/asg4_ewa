@@ -5,21 +5,35 @@ import CartItem from '../components/CartItem';
 import { CartContext } from '../context/CartContext';
 
 function Cart() {
-  const { cartItems, removeFromCart, updateQuantity } = useContext(CartContext);
+  const { cartItems, removeFromCart } = useContext(CartContext);
   const navigate = useNavigate();
 
   const handleCheckout = () => {
-    navigate('/checkout');
+    navigate('/checkout', { state: { cartItems } });
   };
+  
 
   const calculateTotal = () => {
     return cartItems.reduce((total, item) => {
+      // Ensure price and quantity are numbers
+      const itemPrice = Number(item.price) || 0;
+      const itemQuantity = Number(item.quantity) || 1;
+  
+      // Calculate warranty cost
       let warrantyCost = 0;
-      if (item.warranty === '1year') warrantyCost = Number(item.price) / 10;
-      if (item.warranty === '2year') warrantyCost = Number(item.price) / 5;
-      return total + (Number(item.price) + warrantyCost) * item.quantity;
+      if (item.warranty === '1year') warrantyCost = itemPrice / 10;
+      if (item.warranty === '2year') warrantyCost = itemPrice / 5;
+  
+      // Calculate accessories total, ensuring prices are numbers
+      const accessoriesPrice = item.accessories.reduce((acc, accessory) => {
+        return acc + (Number(accessory.price) || 0);
+      }, 0);
+  
+      // Return updated total
+      return total + (itemPrice + warrantyCost + accessoriesPrice) * itemQuantity;
     }, 0);
   };
+  
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-gray-100 min-h-screen">
@@ -33,7 +47,6 @@ function Cart() {
               key={item.id} 
               item={item} 
               removeFromCart={removeFromCart} 
-              updateQuantity={updateQuantity} // Pass updateQuantity to CartItem
             />
           ))}
         </ul>

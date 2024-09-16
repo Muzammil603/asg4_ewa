@@ -1,7 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
+import { CartContext } from '../context/CartContext'; // Import CartContext
 
-function Checkout({ cartItems }) {
+function Checkout() {
+  const location = useLocation();
+  const cartItems = location.state?.cartItems || [];
+  const { setCartItems } = useContext(CartContext); // Destructure setCartItems from context
   const [customerInfo, setCustomerInfo] = useState({
     name: localStorage.getItem('userName'),
     street: '',
@@ -25,33 +30,17 @@ function Checkout({ cartItems }) {
     { area: 'Greektown', zip: '60607' },
     { area: 'Little Italy', zip: '60608' },
     { area: 'Bridgeport', zip: '60609' },
-    { area: 'Old Town', zip: '60610' }
+    { area: 'Old Town', zip: '60610' },
   ];
 
-  // Retrieve the logged-in user information from localStorage
   useEffect(() => {
-    // const users = JSON.parse(localStorage.getItem('users')) || []; // Get the users from localStorage
-    const loggedInUserName = localStorage.getItem('userName'); // Get the logged-in user's email from localStorage
-    console.log(loggedInUserName  );
-    // if (loggedInUserEmail) {
-    //   const loggedInUser = users.find(user => user.email === loggedInUserEmail); // Find the logged-in user
-
-    //   if (loggedInUser) {
-    //     setCustomerInfo(prevState => ({
-    //       ...prevState,
-    //       name: loggedInUser.name // Automatically populate the name
-    //     }));
-    //   } else {
-    //     console.error('Logged-in user not found.');
-    //   }
-    // } else {
-    //   console.error('No logged-in user in local storage.');
-    // }
+    const loggedInUserName = localStorage.getItem('userName');
+    console.log(loggedInUserName);
   }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setCustomerInfo(prevState => ({ ...prevState, [name]: value }));
+    setCustomerInfo((prevState) => ({ ...prevState, [name]: value }));
   };
 
   const generateConfirmationNumber = () => {
@@ -74,19 +63,41 @@ function Checkout({ cartItems }) {
       confirmationNumber,
       deliveryDate,
     };
+
     // Save order to localStorage or send to server
     const storedOrders = JSON.parse(localStorage.getItem('orders')) || [];
     storedOrders.push(order);
     localStorage.setItem('orders', JSON.stringify(storedOrders));
+
+    // Clear the cart after order is placed
+    setCartItems([]); // Clear cart items from context
+    localStorage.removeItem('cart'); // Clear cart from localStorage
+
+    // Redirect to order confirmation page with the order details
     navigate('/order-confirmation', { state: { order } });
   };
 
   const calculateTotal = () => {
     return cartItems.reduce((total, item) => {
+      const price = Number(item.price) || 0; // Ensure the price is a number, default to 0 if undefined
       let warrantyCost = 0;
-      if (item.warranty === '1year') warrantyCost = Number(item.price) / 10;
-      if (item.warranty === '2year') warrantyCost = Number(item.price) / 5;
-      return total + Number(item.price) + warrantyCost;
+
+      // Calculate warranty cost if applicable
+      if (item.warranty === '1year') {
+        warrantyCost = price / 10;
+      } else if (item.warranty === '2year') {
+        warrantyCost = price / 5;
+      }
+
+      // Calculate the total cost of accessories if applicable
+      const accessoryTotal =
+        item.accessories?.reduce((accTotal, acc) => {
+          return accTotal + (Number(acc.price) || 0); // Ensure accessory price is a number
+        }, 0) || 0;
+
+      const itemTotal =
+        (price + warrantyCost + accessoryTotal) * (Number(item.quantity) || 1); // Multiply by quantity, default to 1 if missing
+      return total + itemTotal;
     }, 0);
   };
 
@@ -96,80 +107,79 @@ function Checkout({ cartItems }) {
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
           <label className="block text-gray-700 mb-2">Name</label>
-          <input 
-            type="text" 
-            name="name" 
-            value={customerInfo.name} 
-            
-            onChange={handleChange} 
+          <input
+            type="text"
+            name="name"
+            value={customerInfo.name}
+            onChange={handleChange}
             className="w-full p-2 border border-gray-300 rounded-md"
             readOnly // Make the name field read-only
-            required 
+            required
           />
         </div>
         <div className="mb-4">
           <label className="block text-gray-700 mb-2">Street</label>
-          <input 
-            type="text" 
-            name="street" 
-            value={customerInfo.street} 
-            onChange={handleChange} 
+          <input
+            type="text"
+            name="street"
+            value={customerInfo.street}
+            onChange={handleChange}
             className="w-full p-2 border border-gray-300 rounded-md"
-            required 
+            required
           />
         </div>
         <div className="mb-4">
           <label className="block text-gray-700 mb-2">City</label>
-          <input 
-            type="text" 
-            name="city" 
-            value={customerInfo.city} 
-            onChange={handleChange} 
+          <input
+            type="text"
+            name="city"
+            value={customerInfo.city}
+            onChange={handleChange}
             className="w-full p-2 border border-gray-300 rounded-md"
-            required 
+            required
           />
         </div>
         <div className="mb-4">
           <label className="block text-gray-700 mb-2">State</label>
-          <input 
-            type="text" 
-            name="state" 
-            value={customerInfo.state} 
-            onChange={handleChange} 
+          <input
+            type="text"
+            name="state"
+            value={customerInfo.state}
+            onChange={handleChange}
             className="w-full p-2 border border-gray-300 rounded-md"
-            required 
+            required
           />
         </div>
         <div className="mb-4">
           <label className="block text-gray-700 mb-2">Zip Code</label>
-          <input 
-            type="text" 
-            name="zipCode" 
-            value={customerInfo.zipCode} 
-            onChange={handleChange} 
+          <input
+            type="text"
+            name="zipCode"
+            value={customerInfo.zipCode}
+            onChange={handleChange}
             className="w-full p-2 border border-gray-300 rounded-md"
-            required 
+            required
           />
         </div>
         <div className="mb-4">
           <label className="block text-gray-700 mb-2">Credit Card</label>
-          <input 
-            type="text" 
-            name="creditCard" 
-            value={customerInfo.creditCard} 
-            onChange={handleChange} 
+          <input
+            type="text"
+            name="creditCard"
+            value={customerInfo.creditCard}
+            onChange={handleChange}
             className="w-full p-2 border border-gray-300 rounded-md"
-            required 
+            required
           />
         </div>
         <div className="mb-4">
           <label className="block text-gray-700 mb-2">Delivery Option</label>
-          <select 
-            name="deliveryOption" 
-            value={customerInfo.deliveryOption} 
-            onChange={handleChange} 
+          <select
+            name="deliveryOption"
+            value={customerInfo.deliveryOption}
+            onChange={handleChange}
             className="w-full p-2 border border-gray-300 rounded-md"
-            required 
+            required
           >
             <option value="">Select an option</option>
             <option value="delivery">Delivery</option>
@@ -179,12 +189,12 @@ function Checkout({ cartItems }) {
         {customerInfo.deliveryOption === 'pickup' && (
           <div className="mb-4">
             <label className="block text-gray-700 mb-2">Pickup Location</label>
-            <select 
-              name="pickupLocation" 
-              value={customerInfo.pickupLocation} 
-              onChange={handleChange} 
+            <select
+              name="pickupLocation"
+              value={customerInfo.pickupLocation}
+              onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded-md"
-              required 
+              required
             >
               <option value="">Select a location</option>
               {pickupLocations.map((location, index) => (
@@ -198,13 +208,16 @@ function Checkout({ cartItems }) {
         <div className="mb-4">
           <h2 className="text-xl font-bold mb-2">Order Summary</h2>
           <ul className="space-y-2">
-            {cartItems.map(item => (
+            {cartItems.map((item) => (
               <li key={item.id}>
                 {item.name} - ${item.price}
                 {item.warranty !== 'none' && (
                   <p>
-                    Warranty: {item.warranty === '1year' ? '1 Year' : '2 Years'} 
-                    (+${item.warranty === '1year' ? (Number(item.price) / 10) : (Number(item.price) / 5)})
+                    Warranty: {item.warranty === '1year' ? '1 Year' : '2 Years'} (+$
+                    {item.warranty === '1year'
+                      ? Number(item.price) / 10
+                      : Number(item.price) / 5}
+                    )
                   </p>
                 )}
               </li>
@@ -212,9 +225,8 @@ function Checkout({ cartItems }) {
           </ul>
           <p className="text-xl font-semibold mt-4">Total: ${calculateTotal()}</p>
         </div>
-        <button 
-          type="submit" 
-       
+        <button
+          type="submit"
           className="mt-4 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition duration-300"
         >
           Place Order

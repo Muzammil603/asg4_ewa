@@ -29,27 +29,47 @@ function OrderHistory() {
   };
 
   return (
-    <div>
-      <h2>Order History</h2>
+    <div className="container mx-auto p-4">
+      <h2 className="text-2xl font-bold mb-4">Order History</h2>
       {orders.length === 0 ? (
-        <p>No orders found.</p>
+        <p className="text-gray-600">No orders found.</p>
       ) : (
-        <ul>
-          {orders.map((order, index) => (
-            <li key={index}>
-              <p>Confirmation Number: {order.confirmationNumber}</p>
-              <p>Name: {order.name}</p>
-              <p>Address: {order.street}, {order.city}, {order.state}, {order.zipCode}</p>
-              <p>Delivery Date: {order.deliveryDate}</p>
-              {/* Display other order details */}
-              {isCancellationAllowed(order.deliveryDate) ? (
-                <button onClick={() => handleCancelOrder(order.confirmationNumber)}>Cancel Order</button>
-              ) : (
-                <p>Cancellation not allowed within 5 business days of delivery.</p>
-              )}
-            </li>
-          ))}
-        </ul>
+        <div className="overflow-x-auto">
+          <table className="min-w-full border-collapse">
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="border px-4 py-2">Confirmation Number</th>
+                <th className="border px-4 py-2">Name</th>
+                <th className="border px-4 py-2">Address</th>
+                <th className="border px-4 py-2">Delivery Date</th>
+                <th className="border px-4 py-2">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {orders.map((order, index) => (
+                <tr key={index} className="text-center">
+                  <td className="border px-4 py-2">{order.confirmationNumber}</td>
+                  <td className="border px-4 py-2">{order.name}</td>
+                  <td className="border px-4 py-2">
+                    {order.street}, {order.city}, {order.state}, {order.zipCode}
+                  </td>
+                  <td className="border px-4 py-2">{order.deliveryDate}</td>
+                  <td className="border px-4 py-2">
+                    {isCancellationAllowed(order.deliveryDate) ? (
+                      <button 
+                        className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700" 
+                        onClick={() => handleCancelOrder(order.confirmationNumber)}>
+                        Cancel Order
+                      </button>
+                    ) : (
+                      <p className="text-gray-600">Cancellation not allowed within 5 business days of delivery.</p>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

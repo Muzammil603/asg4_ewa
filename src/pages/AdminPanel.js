@@ -1,7 +1,6 @@
 // src/pages/AdminPanel.js
 import React, { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
-import OrderHistory from './OrderHistory';
 
 function AdminPanel() {
   const [products, setProducts] = useState([]);
@@ -257,7 +256,6 @@ function AdminPanel() {
           </li>
         ))}
       </ul>
-      <OrderHistory />
     </div>
   );
 }

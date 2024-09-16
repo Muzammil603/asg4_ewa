@@ -8,7 +8,6 @@ function ProductDetails() {
   const [product, setProduct] = useState(null);
   const [selectedAccessories, setSelectedAccessories] = useState([]);
   const [warranty, setWarranty] = useState('none');
-  const [quantity, setQuantity] = useState(1); // State for quantity
   const [loading, setLoading] = useState(true);
   const { addToCart } = useContext(CartContext);
 
@@ -34,12 +33,35 @@ function ProductDetails() {
     });
   };
 
+  const calculateTotalPrice = () => {
+    const accessoriesPrice = selectedAccessories.reduce((total, id) => {
+      const accessory = product.accessories.find(acc => acc.id === id);
+      return total + (accessory ? accessory.price : 0);
+    }, 0);
+
+    let warrantyCost = 0;
+    if (warranty === '1year') warrantyCost = product.price / 10;
+    if (warranty === '2year') warrantyCost = product.price / 5;
+
+    return product.price + accessoriesPrice + warrantyCost;
+  };
+
   const handleAddToCart = () => {
+    const selectedAccessoriesData = selectedAccessories.map(id => {
+      const accessory = product.accessories.find(acc => acc.id === id);
+      return {
+        id: accessory.id,
+        name: accessory.name,
+        price: accessory.price,
+      };
+    });
+
     const cartItem = {
       ...product,
-      accessories: selectedAccessories.map(id => product.accessories.find(acc => acc.id === id)),
+      accessories: selectedAccessoriesData,
       warranty,
-      quantity
+      quantity: 1,
+      totalPrice: calculateTotalPrice(),
     };
     addToCart(cartItem);
     alert('Product added to cart!');
@@ -108,22 +130,6 @@ function ProductDetails() {
           />
           2 Year Warranty (+${(product.price / 5).toFixed(2)})
         </label>
-      </div>
-      <h2 className="text-2xl font-semibold mb-4">Quantity</h2>
-      <div className="flex items-center gap-2">
-        <button 
-          onClick={() => setQuantity(quantity > 1 ? quantity - 1 : 1)} 
-          className="bg-gray-300 hover:bg-gray-400 text-black px-2 py-1 rounded-md"
-        >
-          -
-        </button>
-        <span>{quantity}</span>
-        <button 
-          onClick={() => setQuantity(quantity + 1)} 
-          className="bg-gray-300 hover:bg-gray-400 text-black px-2 py-1 rounded-md"
-        >
-          +
-        </button>
       </div>
       <button
         onClick={handleAddToCart}

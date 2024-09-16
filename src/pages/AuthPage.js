@@ -55,9 +55,11 @@ function AuthPage({ setIsLoggedIn }) {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
-        <h2 className="text-2xl font-bold mb-4 text-center">{isLogin ? 'Login' : 'Sign Up'}</h2>
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-500 to-purple-600 text-white">
+      <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full text-gray-900">
+        <h1 className="text-4xl font-bold mb-2 text-center">SmartHome</h1>
+        <h2 className="text-2xl font-semibold mb-6 text-center">Shop Now in the Future</h2>
+        <h2 className="text-3xl font-bold mb-6 text-center">{isLogin ? 'Login' : 'Sign Up'}</h2>
         {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
         {!isLogin && (
           <div className="mb-4">
@@ -108,7 +110,7 @@ function AuthPage({ setIsLoggedIn }) {
         )}
         <button
           onClick={handleAuth}
-          className="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white py-2 rounded-md mt-4 hover:opacity-90 transition-opacity duration-300"
+          className="w-full bg-gradient-to-r from-teal-400 to-blue-500 text-white py-2 rounded-md mt-4 hover:opacity-90 transition-opacity duration-300"
         >
           {isLogin ? 'Login' : 'Sign Up'}
         </button>
