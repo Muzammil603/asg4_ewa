@@ -67,13 +67,14 @@ function OrderManagement() {
     e.preventDefault();
     if (selectedOrder) {
       const updatedOrders = orders.map((order) =>
-        order.name === selectedOrder.name ? { ...order, ...orderFormData } : order
+        order.id === selectedOrder.id ? { ...order, ...orderFormData } : order
       );
       saveData('orders', updatedOrders);
       setOrders(updatedOrders);
     } else {
       const newOrder = {
         ...orderFormData,
+        id: Date.now().toString(), // Generate a unique ID
         name: selectedUser,
       };
       const updatedOrders = [...orders, newOrder];
@@ -84,8 +85,8 @@ function OrderManagement() {
     setSelectedOrder(null);
   };
 
-  const handleDeleteOrder = (orderName) => {
-    const updatedOrders = orders.filter((order) => order.name !== orderName);
+  const handleDeleteOrder = (orderId) => {
+    const updatedOrders = orders.filter((order) => order.id !== orderId);
     saveData('orders', updatedOrders);
     setOrders(updatedOrders);
     setSelectedOrder(null);
@@ -94,7 +95,10 @@ function OrderManagement() {
 
   const handleSelectOrder = (order) => {
     setSelectedOrder(order);
-    setOrderFormData(order);
+    setOrderFormData({
+      ...order,
+      items: order.items || [] // Ensure items is always an array
+    });
   };
 
   const clearOrderForm = () => {
@@ -133,6 +137,18 @@ function OrderManagement() {
 
       <form onSubmit={handleOrderSubmit} className="bg-white p-4 border border-gray-300 rounded-md shadow-md">
         <h3 className="text-xl font-semibold mb-4">{selectedOrder ? 'Edit Order' : 'Add New Order'}</h3>
+        <div className="mb-4">
+          <label htmlFor="name" className="block text-lg font-medium mb-2">Name:</label>
+          <input
+            type="text"
+            id="name"
+            name="name"
+            value={orderFormData.name}
+            onChange={(e) => setOrderFormData(prevData => ({...prevData, name: e.target.value}))}
+            required
+            className="p-2 border border-gray-300 rounded-md w-full"
+          />
+        </div>
         <div className="mb-4">
           <label htmlFor="street" className="block text-lg font-medium mb-2">Street:</label>
           <input
@@ -209,7 +225,7 @@ function OrderManagement() {
             <input
               type="number"
               value={item.quantity}
-              onChange={(e) => handleItemChange(index, 'quantity', e.target.value)}
+              onChange={(e) => handleItemChange(index, 'quantity', parseInt(e.target.value))}
               placeholder="Quantity"
               required
               className="p-2 border border-gray-300 rounded-md w-20 mr-2"
@@ -250,41 +266,41 @@ function OrderManagement() {
             </tr>
           </thead>
           <tbody>
-  {filteredOrders.map((order) => (
-    <tr key={order.confirmationNumber} className="border-b">
-      <td className="p-2">{order.name}</td>
-      <td className="p-2">{order.street}, {order.city}, {order.state} {order.zipCode}</td>
-      <td className="p-2">
-        {order.cartItems && Array.isArray(order.cartItems) ? (
-          order.cartItems.map((item) => {
-            const product = products.find((p) => p.id === item.id);
-            return (
-              <div key={item.id}>
-                {product?.name} x {item.quantity}
-              </div>
-            );
-          })
-        ) : (
-          <div>No items found</div>
-        )}
-      </td>
-      <td className="p-2">
-        <button
-          onClick={() => handleSelectOrder(order)}
-          className="bg-yellow-500 text-white px-2 py-1 rounded-md mr-2"
-        >
-          Edit
-        </button>
-        <button
-          onClick={() => handleDeleteOrder(order.confirmationNumber)}
-          className="bg-red-500 text-white px-2 py-1 rounded-md"
-        >
-          Delete
-        </button>
-      </td>
-    </tr>
-  ))}
-</tbody>
+            {filteredOrders.map((order) => (
+              <tr key={order.confirmationNumber} className="border-b">
+                <td className="p-2">{order.name}</td>
+                <td className="p-2">{order.street}, {order.city}, {order.state} {order.zipCode}</td>
+                <td className="p-2">
+                  {order.cartItems && Array.isArray(order.cartItems) ? (
+                    order.cartItems.map((item) => {
+                      const product = products.find((p) => p.id === item.id);
+                      return (
+                        <div key={item.id}>
+                          {product?.name} x {item.quantity}
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <div>No items found</div>
+                  )}
+                </td>
+                <td className="p-2">
+                  <button
+                    onClick={() => handleSelectOrder(order)}
+                    className="bg-yellow-500 text-white px-2 py-1 rounded-md mr-2"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDeleteOrder(order.id)}
+                    className="bg-red-500 text-white px-2 py-1 rounded-md"
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
         </table>
       </div>
     </div>

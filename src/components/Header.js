@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 
 function Header({ handleLogout, setIsLoggedIn }) {
   const navigate = useNavigate();
+  const userRole = localStorage.getItem('userRole');
 
   const handleLogoutClick = () => {
     handleLogout();
@@ -18,8 +19,15 @@ function Header({ handleLogout, setIsLoggedIn }) {
           <li><Link to="/" className="font-bold hover:text-gray-200">Home</Link></li>
           <li><Link to="/products" className="font-bold hover:text-gray-200">Products</Link></li>
           <li><Link to="/cart" className="font-bold hover:text-gray-200">Cart</Link></li>
-          <li><Link to="/admin" className="font-bold hover:text-gray-200">Admin Panel</Link></li>
-          <li><Link to="/salesman" className="font-bold hover:text-gray-200">Salesman</Link></li>
+          {userRole === 'storeManager' && (
+            <li><Link to="/admin" className="font-bold hover:text-gray-200">Admin Panel</Link></li>
+          )}
+          {userRole === 'salesman' && (
+            <li><Link to="/salesman" className="font-bold hover:text-gray-200">Salesman</Link></li>
+          )}
+          {userRole === 'storeManager' && (
+            <li><Link to="/salesman" className="font-bold hover:text-gray-200">Salesman</Link></li>
+          )}
           <li><Link to="/order-history" className="font-bold hover:text-gray-200">Order History</Link></li>
         </ul>
         <button 
