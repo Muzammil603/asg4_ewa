@@ -5,7 +5,7 @@ import CartItem from '../components/CartItem';
 import { CartContext } from '../context/CartContext';
 
 function Cart() {
-  const { cartItems, removeFromCart } = useContext(CartContext);
+  const { cartItems, removeFromCart, updateQuantity } = useContext(CartContext);
   const navigate = useNavigate();
 
   const handleCheckout = () => {
@@ -17,7 +17,7 @@ function Cart() {
       let warrantyCost = 0;
       if (item.warranty === '1year') warrantyCost = Number(item.price) / 10;
       if (item.warranty === '2year') warrantyCost = Number(item.price) / 5;
-      return total + Number(item.price) + warrantyCost;
+      return total + (Number(item.price) + warrantyCost) * item.quantity;
     }, 0);
   };
 
@@ -33,12 +33,13 @@ function Cart() {
               key={item.id} 
               item={item} 
               removeFromCart={removeFromCart} 
+              updateQuantity={updateQuantity} // Pass updateQuantity to CartItem
             />
           ))}
         </ul>
       )}
       <div className="mt-8">
-        <p className="text-xl font-semibold">Total: ${calculateTotal()}</p>
+        <p className="text-xl font-semibold">Total: ${calculateTotal().toFixed(2)}</p>
         <button 
           onClick={handleCheckout} 
           className="mt-4 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-lg hover:bg-blue-700 transition duration-300"

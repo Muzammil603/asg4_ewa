@@ -30,7 +30,7 @@ function Checkout({ cartItems }) {
 
   // Retrieve the logged-in user information from localStorage
   useEffect(() => {
-    const users = JSON.parse(localStorage.getItem('users')) || []; // Get the users from localStorage
+    // const users = JSON.parse(localStorage.getItem('users')) || []; // Get the users from localStorage
     const loggedInUserName = localStorage.getItem('userName'); // Get the logged-in user's email from localStorage
     console.log(loggedInUserName  );
     // if (loggedInUserEmail) {

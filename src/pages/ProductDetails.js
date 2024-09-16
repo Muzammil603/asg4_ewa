@@ -4,9 +4,11 @@ import { useParams } from 'react-router-dom';
 import { CartContext } from '../context/CartContext';
 
 function ProductDetails() {
-  const { id:productId } = useParams();
+  const { id: productId } = useParams();
   const [product, setProduct] = useState(null);
   const [selectedAccessories, setSelectedAccessories] = useState([]);
+  const [warranty, setWarranty] = useState('none');
+  const [quantity, setQuantity] = useState(1); // State for quantity
   const [loading, setLoading] = useState(true);
   const { addToCart } = useContext(CartContext);
 
@@ -35,7 +37,9 @@ function ProductDetails() {
   const handleAddToCart = () => {
     const cartItem = {
       ...product,
-      accessories: selectedAccessories.map(id => product.accessories.find(acc => acc.id === id))
+      accessories: selectedAccessories.map(id => product.accessories.find(acc => acc.id === id)),
+      warranty,
+      quantity
     };
     addToCart(cartItem);
     alert('Product added to cart!');
@@ -68,6 +72,58 @@ function ProductDetails() {
             {accessory.name} (${accessory.price})
           </label>
         ))}
+      </div>
+      <h2 className="text-2xl font-semibold mb-4">Warranty</h2>
+      <div className="flex flex-col gap-2">
+        <label className="flex items-center">
+          <input
+            type="radio"
+            name="warranty"
+            value="none"
+            checked={warranty === 'none'}
+            onChange={() => setWarranty('none')}
+            className="mr-2"
+          />
+          No Warranty
+        </label>
+        <label className="flex items-center">
+          <input
+            type="radio"
+            name="warranty"
+            value="1year"
+            checked={warranty === '1year'}
+            onChange={() => setWarranty('1year')}
+            className="mr-2"
+          />
+          1 Year Warranty (+${(product.price / 10).toFixed(2)})
+        </label>
+        <label className="flex items-center">
+          <input
+            type="radio"
+            name="warranty"
+            value="2year"
+            checked={warranty === '2year'}
+            onChange={() => setWarranty('2year')}
+            className="mr-2"
+          />
+          2 Year Warranty (+${(product.price / 5).toFixed(2)})
+        </label>
+      </div>
+      <h2 className="text-2xl font-semibold mb-4">Quantity</h2>
+      <div className="flex items-center gap-2">
+        <button 
+          onClick={() => setQuantity(quantity > 1 ? quantity - 1 : 1)} 
+          className="bg-gray-300 hover:bg-gray-400 text-black px-2 py-1 rounded-md"
+        >
+          -
+        </button>
+        <span>{quantity}</span>
+        <button 
+          onClick={() => setQuantity(quantity + 1)} 
+          className="bg-gray-300 hover:bg-gray-400 text-black px-2 py-1 rounded-md"
+        >
+          +
+        </button>
       </div>
       <button
         onClick={handleAddToCart}
