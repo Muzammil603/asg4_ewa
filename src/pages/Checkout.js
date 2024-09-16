@@ -227,13 +227,18 @@ function Checkout() {
         </div>
         <button
           type="submit"
+          
           className="mt-4 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition duration-300"
+          
         >
           Place Order
         </button>
       </form>
+      
     </div>
+    
   );
+  
 }
 
 export default Checkout;
