@@ -1,4 +1,3 @@
-// src/pages/Products.js
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
@@ -7,18 +6,10 @@ function Products() {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    const storedProducts = JSON.parse(localStorage.getItem('products'));
-    if (storedProducts) {
-      setProducts(storedProducts);
-    } else {
-      fetch('/products.json')
-        .then(response => response.json())
-        .then(data => {
-          setProducts(data);
-          localStorage.setItem('products', JSON.stringify(data));
-        })
-        .catch(error => console.error('Error fetching products:', error));
-    }
+    fetch('http://127.0.0.1:5001/api/products') 
+      .then(response => response.json())
+      .then(data => setProducts(data))
+      .catch(error => console.error('Error fetching products:', error));
   }, []);
 
   return (

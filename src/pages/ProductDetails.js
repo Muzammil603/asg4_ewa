@@ -1,4 +1,3 @@
-// src/pages/ProductDetails.js
 import React, { useState, useEffect, useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import { CartContext } from '../context/CartContext';
@@ -7,31 +6,23 @@ function ProductDetails() {
   const { id: productId } = useParams();
   const [product, setProduct] = useState(null);
   const [selectedAccessories, setSelectedAccessories] = useState([]);
-  const [warranty, setWarranty] = useState('none');
+  const [warranty, setWarranty] = useState('No Warranty');
   const [loading, setLoading] = useState(true);
   const { addToCart } = useContext(CartContext);
+  const [review, setReview] = useState({ rating: '', text: '' });
 
   useEffect(() => {
-    const storedProducts = JSON.parse(localStorage.getItem('products'));
-    if (storedProducts) {
-      const foundProduct = storedProducts.find(p => p.id === productId);
-      setProduct(foundProduct);
-      setLoading(false);
-    } else {
-      console.error('No products found in local storage');
-      setLoading(false);
-    }
+    fetch(`http://127.0.0.1:5001/api/products/${productId}`)
+      .then(response => response.json())
+      .then(productData => {
+        setProduct(productData);
+        setLoading(false);
+      })
+      .catch(error => {
+        console.error('Error fetching product:', error);
+        setLoading(false);
+      });
   }, [productId]);
-
-  const handleAccessoryChange = (accessoryId) => {
-    setSelectedAccessories(prevSelected => {
-      if (prevSelected.includes(accessoryId)) {
-        return prevSelected.filter(id => id !== accessoryId);
-      } else {
-        return [...prevSelected, accessoryId];
-      }
-    });
-  };
 
   const calculateTotalPrice = () => {
     const accessoriesPrice = selectedAccessories.reduce((total, id) => {
@@ -40,8 +31,8 @@ function ProductDetails() {
     }, 0);
 
     let warrantyCost = 0;
-    if (warranty === '1year') warrantyCost = product.price / 10;
-    if (warranty === '2year') warrantyCost = product.price / 5;
+    if (warranty === '1 Year') warrantyCost = product.price * 0.1;
+    if (warranty === '2 Years') warrantyCost = product.price * 0.2;
 
     return product.price + accessoriesPrice + warrantyCost;
   };
@@ -67,6 +58,13 @@ function ProductDetails() {
     alert('Product added to cart!');
   };
 
+  const handleAccessoryChange = (event) => {
+    const { value, checked } = event.target;
+    setSelectedAccessories(prev => 
+      checked ? [...prev, value] : prev.filter(id => id !== value)
+    );
+  };
+
   if (loading) {
     return <p>Loading...</p>;
   }
@@ -80,57 +78,37 @@ function ProductDetails() {
       <h1 className="text-3xl font-bold mb-4">{product.name}</h1>
       <p className="mb-4">{product.description}</p>
       <p className="mb-4 text-lg font-semibold">${product.price}</p>
-      <h2 className="text-2xl font-semibold mb-4">Accessories</h2>
-      <div className="flex flex-wrap gap-4">
-        {product.accessories.map(accessory => (
-          <label key={accessory.id} className="flex items-center">
+      
+      {/* Accessories */}
+      <h2 className="text-2xl font-semibold mt-4 mb-2">Accessories</h2>
+      {product.accessories.map((accessory) => (
+        <div key={accessory.id}>
+          <label>
             <input
               type="checkbox"
               value={accessory.id}
-              checked={selectedAccessories.includes(accessory.id)}
-              onChange={() => handleAccessoryChange(accessory.id)}
-              className="mr-2"
+              onChange={handleAccessoryChange}
             />
             {accessory.name} (${accessory.price})
           </label>
+        </div>
+      ))}
+
+      {/* Warranty */}
+      <h2 className="text-2xl font-semibold mt-4 mb-2">Warranty</h2>
+      <select
+        value={warranty}
+        onChange={(e) => setWarranty(e.target.value)}
+        className="p-2 border rounded-md"
+      >
+        {product.warranty_options.map((option, index) => (
+          <option key={index} value={option}>{option}</option>
         ))}
-      </div>
-      <h2 className="text-2xl font-semibold mb-4">Warranty</h2>
-      <div className="flex flex-col gap-2">
-        <label className="flex items-center">
-          <input
-            type="radio"
-            name="warranty"
-            value="none"
-            checked={warranty === 'none'}
-            onChange={() => setWarranty('none')}
-            className="mr-2"
-          />
-          No Warranty
-        </label>
-        <label className="flex items-center">
-          <input
-            type="radio"
-            name="warranty"
-            value="1year"
-            checked={warranty === '1year'}
-            onChange={() => setWarranty('1year')}
-            className="mr-2"
-          />
-          1 Year Warranty (+${(product.price / 10).toFixed(2)})
-        </label>
-        <label className="flex items-center">
-          <input
-            type="radio"
-            name="warranty"
-            value="2year"
-            checked={warranty === '2year'}
-            onChange={() => setWarranty('2year')}
-            className="mr-2"
-          />
-          2 Year Warranty (+${(product.price / 5).toFixed(2)})
-        </label>
-      </div>
+      </select>
+
+      {/* Total Price */}
+      <p className="mt-4 text-lg font-semibold">Total Price: ${calculateTotalPrice().toFixed(2)}</p>
+
       <button
         onClick={handleAddToCart}
         className="mt-6 px-4 py-2 bg-blue-500 text-white rounded-md shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
