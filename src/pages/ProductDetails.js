@@ -8,8 +8,7 @@ function ProductDetails() {
   const [selectedAccessories, setSelectedAccessories] = useState([]);
   const [warranty, setWarranty] = useState('No Warranty');
   const [loading, setLoading] = useState(true);
-  const { addToCart } = useContext(CartContext);
-  const [review, setReview] = useState({ rating: '', text: '' });
+  const { addToCart } = useContext(CartContext); // Ensure this line is present
 
   useEffect(() => {
     fetch(`http://127.0.0.1:5001/api/products/${productId}`)
@@ -25,16 +24,29 @@ function ProductDetails() {
   }, [productId]);
 
   const calculateTotalPrice = () => {
+    if (!product) {
+      console.error('Product data is not loaded yet.');
+      return 0;
+    }
+
+    const productPrice = Number(product.price);
+    if (isNaN(productPrice)) {
+      console.error('Product price is not a valid number:', product.price);
+      return 0;
+    }
+
     const accessoriesPrice = selectedAccessories.reduce((total, id) => {
       const accessory = product.accessories.find(acc => acc.id === id);
-      return total + (accessory ? accessory.price : 0);
+      return total + (accessory ? Number(accessory.price) : 0);
     }, 0);
 
     let warrantyCost = 0;
-    if (warranty === '1 Year') warrantyCost = product.price * 0.1;
-    if (warranty === '2 Years') warrantyCost = product.price * 0.2;
+    if (warranty === '1 Year') warrantyCost = productPrice * 0.1;
+    if (warranty === '2 Years') warrantyCost = productPrice * 0.2;
 
-    return product.price + accessoriesPrice + warrantyCost;
+    const totalPrice = productPrice + accessoriesPrice + warrantyCost;
+    console.log('Calculated total price:', totalPrice);
+    return totalPrice;
   };
 
   const handleAddToCart = () => {
@@ -47,20 +59,56 @@ function ProductDetails() {
       };
     });
 
+    const totalPrice = calculateTotalPrice();
+
+    if (isNaN(totalPrice) || totalPrice === null) {
+      console.error('Total price calculation failed. Total price is:', totalPrice);
+      alert('Failed to calculate total price. Please try again.');
+      return;
+    }
+
     const cartItem = {
-      ...product,
+      product_id: product.id,
+      name: product.name,
+      price: product.price,
       accessories: selectedAccessoriesData,
       warranty,
       quantity: 1,
-      totalPrice: calculateTotalPrice(),
+      total_price: totalPrice,
     };
+
+    console.log('Adding to cart:', cartItem);
+
+    // Use the addToCart function from context here
     addToCart(cartItem);
-    alert('Product added to cart!');
+
+    // fetch('http://127.0.0.1:5001/api/cart/add', {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //   },
+    //   body: JSON.stringify(cartItem),
+    // })
+    //   .then(response => {
+    //     if (!response.ok) {
+    //       throw new Error('Failed to add item to cart');
+    //     }
+    //     return response.json();
+    //   })
+    //   .then(data => {
+    //     if (data.error) {
+    //       console.error('Error adding to cart:', data.error);
+    //       alert('Failed to add to cart');
+    //     } else {
+    //       alert('Product added to cart!');
+    //     }
+    //   })
+    //   .catch(error => console.error('Error:', error));
   };
 
   const handleAccessoryChange = (event) => {
     const { value, checked } = event.target;
-    setSelectedAccessories(prev => 
+    setSelectedAccessories(prev =>
       checked ? [...prev, value] : prev.filter(id => id !== value)
     );
   };
@@ -78,7 +126,7 @@ function ProductDetails() {
       <h1 className="text-3xl font-bold mb-4">{product.name}</h1>
       <p className="mb-4">{product.description}</p>
       <p className="mb-4 text-lg font-semibold">${product.price}</p>
-      
+
       {/* Accessories */}
       <h2 className="text-2xl font-semibold mt-4 mb-2">Accessories</h2>
       {product.accessories.map((accessory) => (
