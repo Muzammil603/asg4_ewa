@@ -4,34 +4,60 @@ function OrderManagement() {
   const [orders, setOrders] = useState([]);
   const [users, setUsers] = useState([]);
   const [products, setProducts] = useState([]);
+  const [storeLocations, setStoreLocations] = useState([]);
   const [selectedUser, setSelectedUser] = useState('');
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [orderFormData, setOrderFormData] = useState({
-    name: '',
+    id: '',
+    user_name: '',
     street: '',
     city: '',
     state: '',
-    zipCode: '',
-    creditCard: '',
-    items: []
+    zip_code: '',
+    credit_card: '',
+    delivery_option: 'delivery',
+    pickup_location: '',
+    total_amount: '',
+    order_date: '',
+    confirmation_number: '',
+    delivery_date: '',
+    order_items: []
   });
 
   useEffect(() => {
     loadData();
   }, []);
 
-  const loadData = () => {
-    const storedOrders = JSON.parse(localStorage.getItem('orders')) || [];
-    const storedUsers = JSON.parse(localStorage.getItem('users')) || [];
-    const storedProducts = JSON.parse(localStorage.getItem('products')) || [];
+  const loadData = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const [ordersRes, usersRes, productsRes, locationsRes] = await Promise.all([
+        fetch('http://127.0.0.1:5001/api/orders'),
+        fetch('http://127.0.0.1:5001/api/customers'),
+        fetch('http://127.0.0.1:5001/api/products'),
+        fetch('http://127.0.0.1:5001/api/store-locations')
+      ]);
 
-    setOrders(storedOrders);
-    setUsers(storedUsers);
-    setProducts(storedProducts);
-  };
+      const [ordersData, usersData, productsData, locationsData] = await Promise.all([
+        ordersRes.json(),
+        usersRes.json(),
+        productsRes.json(),
+        locationsRes.json()
+      ]);
 
-  const saveData = (key, data) => {
-    localStorage.setItem(key, JSON.stringify(data));
+      setOrders(ordersData);
+      setUsers(usersData);
+      setProducts(productsData);
+      setStoreLocations(locationsData);
+    } catch (error) {
+      console.error('Error loading data:', error);
+      setError('Failed to load data. Please try again later.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleUserFilter = (e) => {
@@ -41,85 +67,191 @@ function OrderManagement() {
   const handleAddItem = () => {
     setOrderFormData(prevData => ({
       ...prevData,
-      items: [...prevData.items, { id: '', quantity: 1 }],
+      order_items: [...prevData.order_items, { id: '', quantity: 1, accessories: [], warranty: '' }],
     }));
   };
 
   const handleRemoveItem = (index) => {
     setOrderFormData(prevData => ({
       ...prevData,
-      items: prevData.items.filter((_, i) => i !== index),
+      order_items: prevData.order_items.filter((_, i) => i !== index),
     }));
   };
 
   const handleItemChange = (index, field, value) => {
     setOrderFormData(prevData => {
-      const updatedItems = [...prevData.items];
-      updatedItems[index] = { ...updatedItems[index], [field]: value };
+      const updatedItems = [...prevData.order_items];
+      updatedItems[index] = { 
+        ...updatedItems[index], 
+        [field]: value,
+      };
       return { 
         ...prevData, 
-        items: updatedItems
+        order_items: updatedItems
       };
     });
   };
 
-  const handleOrderSubmit = (e) => {
-    e.preventDefault();
-    if (selectedOrder) {
-      const updatedOrders = orders.map((order) =>
-        order.id === selectedOrder.id ? { ...order, ...orderFormData } : order
-      );
-      saveData('orders', updatedOrders);
-      setOrders(updatedOrders);
-    } else {
-      const newOrder = {
-        ...orderFormData,
-        id: Date.now().toString(), // Generate a unique ID
-        name: selectedUser,
+  const handleAccessoryChange = (itemIndex, accIndex, value) => {
+    setOrderFormData(prevData => {
+      const updatedItems = [...prevData.order_items];
+      const updatedAccessories = [...(updatedItems[itemIndex].accessories || [])];
+      updatedAccessories[accIndex] = value;
+      updatedItems[itemIndex] = { 
+        ...updatedItems[itemIndex], 
+        accessories: updatedAccessories
       };
-      const updatedOrders = [...orders, newOrder];
-      saveData('orders', updatedOrders);
-      setOrders(updatedOrders);
-    }
-    clearOrderForm();
-    setSelectedOrder(null);
+      return { 
+        ...prevData, 
+        order_items: updatedItems
+      };
+    });
   };
 
-  const handleDeleteOrder = (orderId) => {
-    const updatedOrders = orders.filter((order) => order.id !== orderId);
-    saveData('orders', updatedOrders);
-    setOrders(updatedOrders);
-    setSelectedOrder(null);
-    clearOrderForm();
+  const handleAddAccessory = (itemIndex) => {
+    setOrderFormData(prevData => {
+      const updatedItems = [...prevData.order_items];
+      updatedItems[itemIndex] = { 
+        ...updatedItems[itemIndex], 
+        accessories: [...(updatedItems[itemIndex].accessories || []), '']
+      };
+      return { 
+        ...prevData, 
+        order_items: updatedItems
+      };
+    });
+  };
+
+  const handleWarrantyChange = (itemIndex, value) => {
+    setOrderFormData(prevData => {
+      const updatedItems = [...prevData.order_items];
+      updatedItems[itemIndex] = { 
+        ...updatedItems[itemIndex], 
+        warranty: value
+      };
+      return { 
+        ...prevData, 
+        order_items: updatedItems
+      };
+    });
+  };
+
+  const handleOrderSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const method = selectedOrder ? 'PUT' : 'POST';
+      const endpoint = selectedOrder 
+        ? `http://127.0.0.1:5001/api/orders/update/${selectedOrder.id}` 
+        : 'http://127.0.0.1:5001/api/orders/add';
+      
+      const response = await fetch(endpoint, {
+        method: method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(orderFormData),
+      });
+      
+      if (response.ok) {
+        loadData();
+        clearOrderForm();
+        setSelectedOrder(null);
+      } else {
+        const data = await response.json();
+        setError(`Error submitting order: ${data.error}`);
+      }
+    } catch (error) {
+      console.error('Error submitting order:', error);
+      setError('Failed to submit order. Please try again.');
+    }
+  };
+
+  const handleDeleteOrder = async (orderId) => {
+    try {
+      const response = await fetch(`http://127.0.0.1:5001/api/orders/delete/${orderId}`, {
+        method: 'DELETE',
+      });
+      if (response.ok) {
+        loadData();
+      } else {
+        const data = await response.json();
+        setError(`Error deleting order: ${data.error}`);
+      }
+    } catch (error) {
+      console.error('Error deleting order:', error);
+      setError('Failed to delete order. Please try again.');
+    }
   };
 
   const handleSelectOrder = (order) => {
+    console.log('Selected Order:', order);
     setSelectedOrder(order);
+    
+    // Parse order_items if it's a string
+    let parsedItems = order.order_items;
+    if (typeof order.order_items === 'string') {
+      try {
+        parsedItems = JSON.parse(order.order_items);
+      } catch (error) {
+        console.error('Error parsing order items:', error);
+        parsedItems = [];
+      }
+    }
+
     setOrderFormData({
-      ...order,
-      items: order.items || [] // Ensure items is always an array
+      id: order.id,
+      user_name: order.user_name,
+      street: order.street,
+      city: order.city,
+      state: order.state,
+      zip_code: order.zip_code,
+      credit_card: order.credit_card,
+      delivery_option: order.delivery_option,
+      pickup_location: order.pickup_location || '',
+      total_amount: order.total_amount,
+      order_date: order.order_date.split(' ')[0],
+      confirmation_number: order.confirmation_number,
+      delivery_date: order.delivery_date,
+      order_items: Array.isArray(parsedItems) ? parsedItems : []
     });
   };
 
   const clearOrderForm = () => {
     setOrderFormData({
-      name: '',
+      id: '',
+      user_name: '',
       street: '',
       city: '',
       state: '',
-      zipCode: '',
-      creditCard: '',
-      items: []
+      zip_code: '',
+      credit_card: '',
+      delivery_option: 'delivery',
+      pickup_location: '',
+      total_amount: '',
+      order_date: '',
+      confirmation_number: '',
+      delivery_date: '',
+      order_items: []
     });
   };
 
   const filteredOrders = selectedUser
-    ? orders.filter(order => order.name === selectedUser)
+    ? orders.filter(order => order.user_name === selectedUser)
     : orders;
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
 
   return (
     <div className="p-4">
       <h2 className="text-2xl font-bold mb-4">Order Management</h2>
+
+      {/* User Filter */}
       <div className="mb-4">
         <label htmlFor="userFilter" className="block text-lg font-medium mb-2">Filter by User:</label>
         <select
@@ -129,26 +261,33 @@ function OrderManagement() {
           className="p-2 border border-gray-300 rounded-md"
         >
           <option value="">All Users</option>
-          {users.map((user) => (
+          {users && users.map((user) => (
             <option key={user.id} value={user.name}>{user.name}</option>
           ))}
         </select>
       </div>
 
-      <form onSubmit={handleOrderSubmit} className="bg-white p-4 border border-gray-300 rounded-md shadow-md">
-        <h3 className="text-xl font-semibold mb-4">{selectedOrder ? 'Edit Order' : 'Add New Order'}</h3>
+      {/* Order Form */}
+      <form onSubmit={handleOrderSubmit} className="bg-white p-4 border border-gray-300 rounded-md shadow-md mb-6">
+        <h3 className="text-xl font-semibold mb-4">
+          {selectedOrder ? `Edit Order for ${orderFormData.user_name}` : 'Add New Order'}
+        </h3>
+
+        {/* Customer Name */}
         <div className="mb-4">
-          <label htmlFor="name" className="block text-lg font-medium mb-2">Name:</label>
+          <label htmlFor="userName" className="block text-lg font-medium mb-2">Customer Name:</label>
           <input
             type="text"
-            id="name"
-            name="name"
-            value={orderFormData.name}
-            onChange={(e) => setOrderFormData(prevData => ({...prevData, name: e.target.value}))}
+            id="userName"
+            name="user_name"
+            value={orderFormData.user_name}
+            onChange={(e) => setOrderFormData(prevData => ({...prevData, user_name: e.target.value}))}
             required
             className="p-2 border border-gray-300 rounded-md w-full"
           />
         </div>
+
+        {/* Address Fields */}
         <div className="mb-4">
           <label htmlFor="street" className="block text-lg font-medium mb-2">Street:</label>
           <input
@@ -186,125 +325,273 @@ function OrderManagement() {
           />
         </div>
         <div className="mb-4">
-          <label htmlFor="zipCode" className="block text-lg font-medium mb-2">Zip Code:</label>
+          <label htmlFor="zip_code" className="block text-lg font-medium mb-2">Zip Code:</label>
           <input
             type="text"
-            id="zipCode"
-            name="zipCode"
-            value={orderFormData.zipCode}
-            onChange={(e) => setOrderFormData(prevData => ({...prevData, zipCode: e.target.value}))}
+            id="zip_code"
+            name="zip_code"
+            value={orderFormData.zip_code}
+            onChange={(e) => setOrderFormData(prevData => ({ ...prevData, zip_code: e.target.value }))}
             required
             className="p-2 border border-gray-300 rounded-md w-full"
           />
         </div>
+
+        {/* Credit Card */}
         <div className="mb-4">
           <label htmlFor="creditCard" className="block text-lg font-medium mb-2">Credit Card:</label>
           <input
             type="text"
             id="creditCard"
-            name="creditCard"
-            value={orderFormData.creditCard}
-            onChange={(e) => setOrderFormData(prevData => ({...prevData, creditCard: e.target.value}))}
+            name="credit_card"
+            value={orderFormData.credit_card}
+            onChange={(e) => setOrderFormData(prevData => ({...prevData, credit_card: e.target.value}))}
             required
             className="p-2 border border-gray-300 rounded-md w-full"
           />
         </div>
-        {orderFormData.items.map((item, index) => (
-          <div key={index} className="flex items-center mb-2">
+
+        {/* Delivery Option */}
+        <div className="mb-4">
+          <label htmlFor="deliveryOption" className="block text-lg font-medium mb-2">Delivery Option:</label>
+          <select
+            id="deliveryOption"
+            name="delivery_option"
+            value={orderFormData.delivery_option}
+            onChange={(e) => setOrderFormData(prevData => ({...prevData, delivery_option: e.target.value, pickup_location: ''}))}
+            className="p-2 border border-gray-300 rounded-md w-full"
+          >
+            <option value="delivery">Delivery</option>
+            <option value="pickup">Pickup</option>
+          </select>
+        </div>
+
+        {/* Pickup Location */}
+        {orderFormData.delivery_option === 'pickup' && (
+          <div className="mb-4">
+            <label htmlFor="pickupLocation" className="block text-lg font-medium mb-2">Pickup Location:</label>
             <select
-              value={item.id}
-              onChange={(e) => handleItemChange(index, 'id', e.target.value)}
-              required
-              className="p-2 border border-gray-300 rounded-md mr-2"
+              id="pickupLocation"
+              name="pickup_location"
+              value={orderFormData.pickup_location}
+              onChange={(e) => setOrderFormData(prevData => ({...prevData, pickup_location: e.target.value}))}
+              className="p-2 border border-gray-300 rounded-md w-full"
             >
-              <option value="">Select a product</option>
-              {products.map((product) => (
-                <option key={product.id} value={product.id}>{product.name}</option>
+              <option value="">Select Pickup Location</option>
+              {storeLocations && storeLocations.map((location) => (
+                <option key={location.id} value={location.street}>
+                  {`${location.street}, ${location.city}, ${location.state} ${location.zip_code}`}
+                </option>
               ))}
             </select>
-            <input
-              type="number"
-              value={item.quantity}
-              onChange={(e) => handleItemChange(index, 'quantity', parseInt(e.target.value))}
-              placeholder="Quantity"
-              required
-              className="p-2 border border-gray-300 rounded-md w-20 mr-2"
-            />
-            <button
-              type="button"
-              onClick={() => handleRemoveItem(index)}
-              className="ml-2 bg-red-500 text-white px-3 py-1 rounded-md"
-            >
-              Remove
-            </button>
           </div>
+        )}
+
+        {/* Total Amount */}
+        <div className="mb-4">
+          <label htmlFor="totalAmount" className="block text-lg font-medium mb-2">Total Amount:</label>
+          <input
+            type="number"
+            id="totalAmount"
+            name="total_amount"
+            value={orderFormData.total_amount}
+            onChange={(e) => setOrderFormData(prevData => ({...prevData, total_amount: e.target.value}))}
+            required
+            className="p-2 border border-gray-300 rounded-md w-full"
+          />
+        </div>
+
+        {/* Order Date */}
+        <div className="mb-4">
+          <label htmlFor="orderDate" className="block text-lg font-medium mb-2">Order Date:</label>
+          <input
+            type="date"
+            id="orderDate"
+            name="order_date"
+            value={orderFormData.order_date}
+            onChange={(e) => setOrderFormData(prevData => ({...prevData, order_date: e.target.value}))}
+            required
+            className="p-2 border border-gray-300 rounded-md w-full"
+          />
+          </div>
+
+{/* Confirmation Number */}
+<div className="mb-4">
+  <label htmlFor="confirmationNumber" className="block text-lg font-medium mb-2">Confirmation Number:</label>
+  <input
+    type="text"
+    id="confirmationNumber"
+    name="confirmation_number"
+    value={orderFormData.confirmation_number}
+    onChange={(e) => setOrderFormData(prevData => ({...prevData, confirmation_number: e.target.value}))}
+    required
+    className="p-2 border border-gray-300 rounded-md w-full"
+  />
+</div>
+
+{/* Delivery Date */}
+<div className="mb-4">
+  <label htmlFor="deliveryDate" className="block text-lg font-medium mb-2">Delivery Date:</label>
+  <input
+    type="date"
+    id="deliveryDate"
+    name="delivery_date"
+    value={orderFormData.delivery_date}
+    onChange={(e) => setOrderFormData(prevData => ({...prevData, delivery_date: e.target.value}))}
+    required
+    className="p-2 border border-gray-300 rounded-md w-full"
+  />
+</div>
+
+{/* Order Items */}
+<div className="mb-4">
+  <label className="block text-lg font-medium mb-2">Order Items:</label>
+  {orderFormData.order_items.map((item, index) => (
+    <div key={index} className="border p-4 mb-4 rounded-md">
+      <select
+        value={item.id}
+        onChange={(e) => handleItemChange(index, 'id', e.target.value)}
+        required
+        className="p-2 border border-gray-300 rounded-md mr-2"
+      >
+        <option value="">Select a product</option>
+        {products && products.map((product) => (
+          <option key={product.id} value={product.id}>{product.name}</option>
+        ))}
+      </select>
+      <input
+        type="number"
+        value={item.quantity}
+        onChange={(e) => handleItemChange(index, 'quantity', parseInt(e.target.value))}
+        placeholder="Quantity"
+        required
+        className="p-2 border border-gray-300 rounded-md w-20 mr-2"
+      />
+      <div className="mt-2">
+        <label className="block text-sm font-medium mb-1">Accessories:</label>
+        {item.accessories && item.accessories.map((acc, accIndex) => (
+          <input
+            key={accIndex}
+            type="text"
+            value={acc}
+            onChange={(e) => handleAccessoryChange(index, accIndex, e.target.value)}
+            className="p-2 border border-gray-300 rounded-md mr-2 mb-2"
+            placeholder="Accessory"
+          />
         ))}
         <button
           type="button"
-          onClick={handleAddItem}
-          className="mb-4 bg-blue-500 text-white px-4 py-2 rounded-md"
+          onClick={() => handleAddAccessory(index)}
+          className="bg-blue-500 text-white px-2 py-1 rounded-md text-sm"
         >
-          Add Item
+          Add Accessory
         </button>
-        <button
-          type="submit"
-          className="bg-green-500 text-white px-4 py-2 rounded-md"
-        >
-          {selectedOrder ? 'Update Order' : 'Submit Order'}
-        </button>
-      </form>
-
-      <div className="mt-6">
-        <h3 className="text-xl font-semibold mb-4">Order List</h3>
-        <table className="min-w-full bg-white border border-gray-300 rounded-md shadow-md">
-          <thead>
-            <tr className="bg-gray-100 border-b">
-              <th className="p-2">Customer</th>
-              <th className="p-2">Address</th>
-              <th className="p-2">Items</th>
-              <th className="p-2">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredOrders.map((order) => (
-              <tr key={order.confirmationNumber} className="border-b">
-                <td className="p-2">{order.name}</td>
-                <td className="p-2">{order.street}, {order.city}, {order.state} {order.zipCode}</td>
-                <td className="p-2">
-                  {order.cartItems && Array.isArray(order.cartItems) ? (
-                    order.cartItems.map((item) => {
-                      const product = products.find((p) => p.id === item.id);
-                      return (
-                        <div key={item.id}>
-                          {product?.name} x {item.quantity}
-                        </div>
-                      );
-                    })
-                  ) : (
-                    <div>No items found</div>
-                  )}
-                </td>
-                <td className="p-2">
-                  <button
-                    onClick={() => handleSelectOrder(order)}
-                    className="bg-yellow-500 text-white px-2 py-1 rounded-md mr-2"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDeleteOrder(order.id)}
-                    className="bg-red-500 text-white px-2 py-1 rounded-md"
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
       </div>
+      <div className="mt-2">
+        <label className="block text-sm font-medium mb-1">Warranty:</label>
+        <input
+          type="text"
+          value={item.warranty || ''}
+          onChange={(e) => handleWarrantyChange(index, e.target.value)}
+          className="p-2 border border-gray-300 rounded-md mr-2"
+          placeholder="Warranty"
+        />
+      </div>
+      <button
+        type="button"
+        onClick={() => handleRemoveItem(index)}
+        className="mt-2 bg-red-500 text-white px-3 py-1 rounded-md"
+      >
+        Remove Item
+      </button>
     </div>
-  );
+  ))}
+  <button
+    type="button"
+    onClick={handleAddItem}
+    className="mt-2 bg-blue-500 text-white px-4 py-2 rounded-md"
+  >
+    Add Item
+  </button>
+</div>
+
+<button
+  type="submit"
+  className="bg-green-500 text-white px-4 py-2 rounded-md"
+>
+  {selectedOrder ? 'Update Order' : 'Submit Order'}
+</button>
+</form>
+
+{/* Order List */}
+<div className="mt-6">
+<h3 className="text-xl font-semibold mb-4">Order List</h3>
+{filteredOrders && filteredOrders.length > 0 ? (
+  <table className="min-w-full bg-white border border-gray-300 rounded-md shadow-md">
+    <thead>
+      <tr className="bg-gray-100 border-b">
+        <th className="p-2">ID</th>
+        <th className="p-2">Customer</th>
+        <th className="p-2">Address</th>
+        <th className="p-2">Credit Card</th>
+        <th className="p-2">Delivery Option</th>
+        <th className="p-2">Pickup Location</th>
+        <th className="p-2">Total Amount</th>
+        <th className="p-2">Order Date</th>
+        <th className="p-2">Confirmation #</th>
+        <th className="p-2">Delivery Date</th>
+        <th className="p-2">Items</th>
+        <th className="p-2">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {filteredOrders.map((order) => (
+        <tr key={order.id} className="border-b">
+          <td className="p-2">{order.id}</td>
+          <td className="p-2">{order.user_name}</td>
+          <td className="p-2">{order.street}, {order.city}, {order.state} {order.zip_code}</td>
+          <td className="p-2">{order.credit_card}</td>
+          <td className="p-2">{order.delivery_option}</td>
+          <td className="p-2">{order.pickup_location || 'N/A'}</td>
+          <td className="p-2">${order.total_amount}</td>
+          <td className="p-2">{order.order_date}</td>
+          <td className="p-2">{order.confirmation_number}</td>
+          <td className="p-2">{order.delivery_date}</td>
+          <td className="p-2">
+            {order.order_items && JSON.parse(order.order_items).map((item, idx) => (
+              <div key={idx}>
+                {products && products.find(p => p.id === item.id)?.name} x {item.quantity}
+                <br />
+                Accessories: {item.accessories && item.accessories.join(', ')}
+                <br />
+                Warranty: {item.warranty || 'N/A'}
+              </div>
+            ))}
+          </td>
+          <td className="p-2">
+            <button
+              onClick={() => handleSelectOrder(order)}
+              className="bg-yellow-500 text-white px-2 py-1 rounded-md mr-2"
+            >
+              Edit
+            </button>
+            <button
+              onClick={() => handleDeleteOrder(order.id)}
+              className="bg-red-500 text-white px-2 py-1 rounded-md"
+            >
+              Delete
+            </button>
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+) : (
+  <p>No orders found.</p>
+)}
+</div>
+</div>
+);
 }
 
 export default OrderManagement;
