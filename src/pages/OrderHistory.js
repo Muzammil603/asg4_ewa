@@ -2,21 +2,46 @@ import React, { useState, useEffect } from 'react';
 
 function OrderHistory() {
   const [orders, setOrders] = useState([]);
-  const currentUsername = localStorage.getItem('userName'); // Replace with actual logged-in username (from auth system or localStorage)
+  const [error, setError] = useState(null);
+  const currentUsername = localStorage.getItem('userName'); // Retrieve the logged-in username
 
   useEffect(() => {
-    // Fetch order history from local storage (replace with API call to fetch orders from database)
-    const storedOrders = JSON.parse(localStorage.getItem('orders')) || [];
-    
-    // Filter orders by the current logged-in username
-    const filteredOrders = storedOrders.filter(order => order.name === currentUsername);
-    setOrders(filteredOrders);
-  }, []);
+    const fetchOrderHistory = async () => {
+      try {
+        const response = await fetch(`http://127.0.0.1:5001/api/orderhistory/${currentUsername}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch order history.');
+        }
+        const data = await response.json();
+        setOrders(data);
+      } catch (error) {
+        setError(error.message);
+      }
+    };
 
-  const handleCancelOrder = (confirmationNumber) => {
-    const updatedOrders = orders.filter(order => order.confirmationNumber !== confirmationNumber);
-    setOrders(updatedOrders);
-    localStorage.setItem('orders', JSON.stringify(updatedOrders));
+    fetchOrderHistory();
+  }, [currentUsername]);
+
+  const handleCancelOrder = async (confirmationNumber) => {
+    try {
+      const response = await fetch(`http://127.0.0.1:5001/api/orders/cancel/${confirmationNumber}`, {
+        method: 'PUT',
+      });
+      if (response.ok) {
+        // Update the status of the order to "Cancelled" in the local state
+        setOrders((prevOrders) =>
+          prevOrders.map((order) =>
+            order.confirmation_number === confirmationNumber
+              ? { ...order, status: 'Cancelled' }
+              : order
+          )
+        );
+      } else {
+        throw new Error('Failed to cancel order.');
+      }
+    } catch (error) {
+      setError(error.message);
+    }
   };
 
   const isCancellationAllowed = (deliveryDate) => {
@@ -31,6 +56,7 @@ function OrderHistory() {
   return (
     <div className="container mx-auto p-4">
       <h2 className="text-2xl font-bold mb-4">Order History</h2>
+      {error && <p className="text-red-500">{error}</p>}
       {orders.length === 0 ? (
         <p className="text-gray-600">No orders found.</p>
       ) : (
@@ -42,23 +68,27 @@ function OrderHistory() {
                 <th className="border px-4 py-2">Name</th>
                 <th className="border px-4 py-2">Address</th>
                 <th className="border px-4 py-2">Delivery Date</th>
+                <th className="border px-4 py-2">Status</th>
                 <th className="border px-4 py-2">Action</th>
               </tr>
             </thead>
             <tbody>
               {orders.map((order, index) => (
                 <tr key={index} className="text-center">
-                  <td className="border px-4 py-2">{order.confirmationNumber}</td>
+                  <td className="border px-4 py-2">{order.confirmation_number}</td>
                   <td className="border px-4 py-2">{order.name}</td>
                   <td className="border px-4 py-2">
-                    {order.street}, {order.city}, {order.state}, {order.zipCode}
+                    {order.street}, {order.city}, {order.state}, {order.zip_code}
                   </td>
-                  <td className="border px-4 py-2">{order.deliveryDate}</td>
+                  <td className="border px-4 py-2">{order.delivery_date}</td>
+                  <td className="border px-4 py-2">{order.status}</td> {/* Show order status */}
                   <td className="border px-4 py-2">
-                    {isCancellationAllowed(order.deliveryDate) ? (
+                    {order.status === 'Cancelled' ? (
+                      <p className="text-gray-600">Order Cancelled</p>
+                    ) : isCancellationAllowed(order.delivery_date) ? (
                       <button 
                         className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700" 
-                        onClick={() => handleCancelOrder(order.confirmationNumber)}>
+                        onClick={() => handleCancelOrder(order.confirmation_number)}>
                         Cancel Order
                       </button>
                     ) : (
