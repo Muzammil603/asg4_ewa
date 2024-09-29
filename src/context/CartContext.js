@@ -36,7 +36,6 @@ export const CartProvider = ({ children }) => {
       const data = await response.json();
       console.log('Response from adding to cart:', data);
       if (response.ok) {
-        // Fetch the updated cart items instead of updating the state directly
         fetchCartItems();
       } else {
         console.error('Error adding to cart:', data.error);
@@ -52,7 +51,6 @@ export const CartProvider = ({ children }) => {
         method: 'DELETE',
       });
       if (response.ok) {
-        // Fetch the updated cart items instead of updating the state directly
         fetchCartItems();
       } else {
         const errorData = await response.json();
@@ -73,7 +71,6 @@ export const CartProvider = ({ children }) => {
         body: JSON.stringify({ quantity: newQuantity }),
       });
       if (response.ok) {
-        // Fetch the updated cart items instead of updating the state directly
         fetchCartItems();
       } else {
         console.error('Error updating cart');
@@ -83,8 +80,25 @@ export const CartProvider = ({ children }) => {
     }
   };
 
+  // New clearCart function
+  const clearCart = async () => {
+    try {
+      const response = await fetch('http://127.0.0.1:5001/api/cart/clear', {
+        method: 'DELETE',
+      });
+      if (response.ok) {
+        setCartItems([]);
+        localStorage.removeItem('cart');
+      } else {
+        console.error('Error clearing cart');
+      }
+    } catch (error) {
+      console.error('Error clearing cart:', error);
+    }
+  };
+
   return (
-    <CartContext.Provider value={{ cartItems, addToCart, removeFromCart, updateQuantity }}>
+    <CartContext.Provider value={{ cartItems, addToCart, removeFromCart, updateQuantity, clearCart }}>
       {children}
     </CartContext.Provider>
   );

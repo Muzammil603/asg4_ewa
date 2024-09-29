@@ -1,14 +1,11 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useLocation } from 'react-router-dom';
-import { CartContext } from '../context/CartContext'; // Import CartContext
+import { CartContext } from '../context/CartContext';
 
 function Checkout() {
-  const location = useLocation();
-  const cartItems = location.state?.cartItems || [];
-  const { setCartItems } = useContext(CartContext); // Destructure setCartItems from context
+  const { cartItems, clearCart } = useContext(CartContext);
   const [customerInfo, setCustomerInfo] = useState({
-    name: localStorage.getItem('userName'),
+    name: localStorage.getItem('userName') || '',
     street: '',
     city: '',
     state: '',
@@ -17,26 +14,26 @@ function Checkout() {
     deliveryOption: '',
     pickupLocation: '',
   });
-
+  const [storeLocations, setStoreLocations] = useState([]);
   const navigate = useNavigate();
 
-  const pickupLocations = [
-    { area: 'Downtown', zip: '60601' },
-    { area: 'Loop', zip: '60602' },
-    { area: 'Near North Side', zip: '60603' },
-    { area: 'Near South Side', zip: '60604' },
-    { area: 'South Loop', zip: '60605' },
-    { area: 'West Loop', zip: '60606' },
-    { area: 'Greektown', zip: '60607' },
-    { area: 'Little Italy', zip: '60608' },
-    { area: 'Bridgeport', zip: '60609' },
-    { area: 'Old Town', zip: '60610' },
-  ];
-
   useEffect(() => {
-    const loggedInUserName = localStorage.getItem('userName');
-    console.log(loggedInUserName);
-  }, []);
+    fetchStoreLocations();
+    console.log('Cart Items:', JSON.stringify(cartItems, null, 2));
+  }, [cartItems]);
+
+  const fetchStoreLocations = async () => {
+    try {
+      const response = await fetch('http://127.0.0.1:5001/api/store-locations');
+      if (!response.ok) {
+        throw new Error('Failed to fetch store locations');
+      }
+      const data = await response.json();
+      setStoreLocations(data);
+    } catch (error) {
+      console.error('Error fetching store locations:', error);
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -44,7 +41,7 @@ function Checkout() {
   };
 
   const generateConfirmationNumber = () => {
-    return Math.floor(Math.random() * 1000000);
+    return Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
   };
 
   const generateDeliveryDate = () => {
@@ -53,52 +50,64 @@ function Checkout() {
     return date.toDateString();
   };
 
-  const handleSubmit = (e) => {
+  const calculateTotal = () => {
+    return cartItems.reduce((total, item) => {
+      const price = typeof item.total_price === 'number' ? item.total_price : 0;
+      const quantity = typeof item.quantity === 'number' ? item.quantity : 0;
+      const itemTotal = price * quantity;
+      console.log(`Item total for ${item.product_name || 'Unknown Product'}:`, itemTotal);
+      return total + itemTotal;
+    }, 0);
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const confirmationNumber = generateConfirmationNumber();
     const deliveryDate = generateDeliveryDate();
-    const order = {
+    const totalAmount = calculateTotal();
+
+    const orderData = {
       ...customerInfo,
-      cartItems,
+      cartItems: cartItems.map(item => ({
+        product_id: item.product_id,
+        product_name: item.product_name,
+        quantity: item.quantity,
+        total_price: item.total_price,
+        warranty: item.warranty,
+        accessories: item.accessories
+      })),
       confirmationNumber,
       deliveryDate,
+      totalAmount
     };
 
-    // Save order to localStorage or send to server
-    const storedOrders = JSON.parse(localStorage.getItem('orders')) || [];
-    storedOrders.push(order);
-    localStorage.setItem('orders', JSON.stringify(storedOrders));
+    console.log('Sending order data:', JSON.stringify(orderData, null, 2));
 
-    // Clear the cart after order is placed
-    setCartItems([]); // Clear cart items from context
-    localStorage.removeItem('cart'); // Clear cart from localStorage
+    try {
+      const response = await fetch('http://127.0.0.1:5001/api/place-order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(orderData),
+      });
 
-    // Redirect to order confirmation page with the order details
-    navigate('/order-confirmation', { state: { order } });
-  };
-
-  const calculateTotal = () => {
-    return cartItems.reduce((total, item) => {
-      const price = Number(item.price) || 0; // Ensure the price is a number, default to 0 if undefined
-      let warrantyCost = 0;
-
-      // Calculate warranty cost if applicable
-      if (item.warranty === '1year') {
-        warrantyCost = price / 10;
-      } else if (item.warranty === '2year') {
-        warrantyCost = price / 5;
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(`Failed to place order: ${errorData.error || 'Unknown error'}`);
       }
 
-      // Calculate the total cost of accessories if applicable
-      const accessoryTotal =
-        item.accessories?.reduce((accTotal, acc) => {
-          return accTotal + (Number(acc.price) || 0); // Ensure accessory price is a number
-        }, 0) || 0;
+      const result = await response.json();
+      console.log('Order placed successfully:', result);
+      alert('Order placed successfully!');
+      clearCart();
+      localStorage.removeItem('cart');
 
-      const itemTotal =
-        (price + warrantyCost + accessoryTotal) * (Number(item.quantity) || 1); // Multiply by quantity, default to 1 if missing
-      return total + itemTotal;
-    }, 0);
+      navigate('/order-confirmation', { state: { order: orderData } });
+    } catch (error) {
+      console.error('Error placing order:', error);
+      alert(`Failed to place order. ${error.message}`);
+    }
   };
 
   return (
@@ -113,8 +122,8 @@ function Checkout() {
             value={customerInfo.name}
             onChange={handleChange}
             className="w-full p-2 border border-gray-300 rounded-md"
-            readOnly // Make the name field read-only
             required
+            readOnly
           />
         </div>
         <div className="mb-4">
@@ -197,9 +206,9 @@ function Checkout() {
               required
             >
               <option value="">Select a location</option>
-              {pickupLocations.map((location, index) => (
-                <option key={index} value={`${location.area}, ${location.zip}`}>
-                  {location.area}, {location.zip}
+              {storeLocations.map((location) => (
+                <option key={location.id} value={location.street}>
+                  {location.street}, {location.city}, {location.state} {location.zip_code}
                 </option>
               ))}
             </select>
@@ -208,37 +217,35 @@ function Checkout() {
         <div className="mb-4">
           <h2 className="text-xl font-bold mb-2">Order Summary</h2>
           <ul className="space-y-2">
-            {cartItems.map((item) => (
-              <li key={item.id}>
-                {item.name} - ${item.price}
-                {item.warranty !== 'none' && (
-                  <p>
-                    Warranty: {item.warranty === '1year' ? '1 Year' : '2 Years'} (+$
-                    {item.warranty === '1year'
-                      ? Number(item.price) / 10
-                      : Number(item.price) / 5}
-                    )
-                  </p>
+            {cartItems.map((item, index) => (
+              <li key={index} className="border-b pb-2">
+                <div className="font-semibold">
+                  {item.product_name || 'Unknown Product'} - $
+                  {typeof item.total_price === 'number' ? item.total_price.toFixed(2) : 'N/A'}
+                </div>
+                <div>Quantity: {typeof item.quantity === 'number' ? item.quantity : 0}</div>
+                <div>Warranty: {item.warranty || 'No Warranty'}</div>
+                {Array.isArray(item.accessories) && item.accessories.length > 0 && (
+                  <div>
+                    Accessories: {item.accessories.map(acc => 
+                      `${acc.name || 'Unknown Accessory'} (+$${typeof acc.price === 'number' ? acc.price.toFixed(2) : 'N/A'})`
+                    ).join(', ')}
+                  </div>
                 )}
               </li>
             ))}
           </ul>
-          <p className="text-xl font-semibold mt-4">Total: ${calculateTotal()}</p>
+          <p className="text-xl font-semibold mt-4">Total: ${calculateTotal().toFixed(2)}</p>
         </div>
         <button
           type="submit"
-          
           className="mt-4 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition duration-300"
-          
         >
           Place Order
         </button>
       </form>
-      
     </div>
-    
   );
-  
 }
 
 export default Checkout;
