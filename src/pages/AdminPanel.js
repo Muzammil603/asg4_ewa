@@ -1,4 +1,3 @@
-// src/pages/AdminPanel.js
 import React, { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 
@@ -18,29 +17,20 @@ function AdminPanel() {
   });
 
   useEffect(() => {
-    const storedProducts = JSON.parse(localStorage.getItem('products'));
-    if (storedProducts) {
-      setProducts(storedProducts);
-    } else {
-      fetch('/products.json')
-        .then(response => response.json())
-        .then(data => {
-          setProducts(data);
-          localStorage.setItem('products', JSON.stringify(data));
-        })
-        .catch(error => console.error('Error fetching products:', error));
-    }
+    fetchProducts();
   }, []);
+
+  const fetchProducts = () => {
+    fetch('http://127.0.0.1:5001/api/products')
+      .then(response => response.json())
+      .then(data => setProducts(data))
+      .catch(error => console.error('Error fetching products:', error));
+  };
 
   const userRole = localStorage.getItem('userRole');
   if (userRole !== 'storeManager') {
     return <Navigate to="/login" />;
   }
-
-  const saveProducts = (updatedProducts) => {
-    setProducts(updatedProducts);
-    localStorage.setItem('products', JSON.stringify(updatedProducts));
-  };
 
   const handleInputChange = (e) => {
     setFormData({
@@ -67,23 +57,48 @@ function AdminPanel() {
   const handleAddProduct = (e) => {
     e.preventDefault();
     const newProduct = {
-      id: Date.now().toString(),
       ...formData,
+      accessories: formData.accessories
     };
-    const updatedProducts = [...products, newProduct];
-    saveProducts(updatedProducts);
-    setFormData({
-      name: '',
-      description: '',
-      price: '',
-      category: '',
-      accessories: []
-    });
+
+    fetch('http://127.0.0.1:5001/api/products/add', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(newProduct)
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.error) {
+          console.error('Error adding product:', data.error);
+        } else {
+          fetchProducts();
+          setFormData({
+            name: '',
+            description: '',
+            price: '',
+            category: '',
+            accessories: []
+          });
+        }
+      })
+      .catch(error => console.error('Error:', error));
   };
 
   const handleDeleteProduct = (productId) => {
-    const updatedProducts = products.filter(product => product.id !== productId);
-    saveProducts(updatedProducts);
+    fetch(`http://127.0.0.1:5001/api/products/delete/${productId}`, {
+      method: 'DELETE'
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.error) {
+          console.error('Error deleting product:', data.error);
+        } else {
+          fetchProducts();
+        }
+      })
+      .catch(error => console.error('Error:', error));
   };
 
   const handleSelectProduct = (product) => {
@@ -93,18 +108,30 @@ function AdminPanel() {
 
   const handleUpdateProduct = (e) => {
     e.preventDefault();
-    const updatedProducts = products.map(product =>
-      product.id === selectedProduct.id ? formData : product
-    );
-    saveProducts(updatedProducts);
-    setSelectedProduct(null);
-    setFormData({
-      name: '',
-      description: '',
-      price: '',
-      category: '',
-      accessories: []
-    });
+    fetch(`http://127.0.0.1:5001/api/products/update/${selectedProduct.id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(formData)
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.error) {
+          console.error('Error updating product:', data.error);
+        } else {
+          fetchProducts();
+          setSelectedProduct(null);
+          setFormData({
+            name: '',
+            description: '',
+            price: '',
+            category: '',
+            accessories: []
+          });
+        }
+      })
+      .catch(error => console.error('Error:', error));
   };
 
   const handleCancelEdit = () => {
@@ -121,7 +148,7 @@ function AdminPanel() {
   return (
     <div className="max-w-4xl mx-auto p-6 bg-gray-100 min-h-screen">
       <h1 className="text-3xl font-bold mb-6">Admin Panel</h1>
-      <h2 className="text-2xl font-semibold mb-4">Product Management</h2>
+      <h2 className="text-2xl font-semibold mb-4">{selectedProduct ? 'Edit Product' : 'Add Product'}</h2>
       <form
         onSubmit={selectedProduct ? handleUpdateProduct : handleAddProduct}
         className="bg-white shadow-md rounded-lg p-6 mb-6"
@@ -172,11 +199,11 @@ function AdminPanel() {
             className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
           >
             <option value="">Select a category</option>
-            <option value="Smart Doorbells">Smart Doorbells</option>
-            <option value="Smart Doorlocks">Smart Doorlocks</option>
-            <option value="Smart Speakers">Smart Speakers</option>
-            <option value="Smart Lightings">Smart Lightings</option>
-            <option value="Smart Thermostats">Smart Thermostats</option>
+            <option value="1">Smart Doorbells</option>
+            <option value="2">Smart Doorlocks</option>
+            <option value="3">Smart Speakers</option>
+            <option value="4">Smart Lightings</option>
+            <option value="5">Smart Thermostats</option>
           </select>
         </div>
         <div className="mb-4">
