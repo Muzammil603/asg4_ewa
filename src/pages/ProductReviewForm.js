@@ -36,7 +36,7 @@ const ProductReviewForm = () => {
           axios.get('http://127.0.0.1:5001/api/store-locations')
         ]);
         setProducts(productsResponse.data);
-        console.log(products);
+        
         setStoreLocations(storeLocationsResponse.data);
       } catch (err) {
         setError('Failed to fetch data. Please try again later.');
