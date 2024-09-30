@@ -13,6 +13,8 @@ import CustomerRegistration from './pages/CustomerRegistration';
 import AuthPage from './pages/AuthPage';
 import LogoutConfirmation from './pages/LogoutConfirmation';
 import OrderHistory from './pages/OrderHistory';
+import ProductReviewForm from './pages/ProductReviewForm';
+import ProductReviews from './pages/ProductReviews';
 
 function App() {
   const [cartItems, setCartItems] = useState([]);
@@ -67,6 +69,8 @@ function App() {
             <Route path="/register" element={isLoggedIn ? <CustomerRegistration /> : <Navigate to="/auth" />} />
             <Route path="/order-history" element={isLoggedIn ? <OrderHistory customerId={customerId} /> : <Navigate to="/auth" />} />
             <Route path="*" element={<Navigate to={isLoggedIn ? "/" : "/auth"} />} />
+            <Route path="/product-review-form" element={isLoggedIn ? <ProductReviewForm /> : <Navigate to="/auth" />} />
+            <Route path="/product-reviews" element={isLoggedIn ? <ProductReviews /> : <Navigate to="/auth" />} />
           </Routes>
         </main>
         <Footer />

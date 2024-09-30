@@ -29,6 +29,8 @@ function Header({ handleLogout, setIsLoggedIn }) {
             <li><Link to="/salesman" className="font-bold hover:text-gray-200">Salesman</Link></li>
           )}
           <li><Link to="/order-history" className="font-bold hover:text-gray-200">Order History</Link></li>
+          <li><Link to="/product-review-form" className="font-bold hover:text-gray-200">Submit Review</Link></li>
+          <li><Link to="/product-reviews" className="font-bold hover:text-gray-200">View Reviews</Link></li>
         </ul>
         <button 
           onClick={handleLogoutClick} 
