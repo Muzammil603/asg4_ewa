@@ -11,7 +11,7 @@ function OrderManagement() {
   const [error, setError] = useState(null);
   const [orderFormData, setOrderFormData] = useState({
     id: '',
-    user_name: '',
+    name: '',
     street: '',
     city: '',
     state: '',
@@ -67,34 +67,34 @@ function OrderManagement() {
   const handleAddItem = () => {
     setOrderFormData(prevData => ({
       ...prevData,
-      order_items: [...prevData.order_items, { id: '', quantity: 1, accessories: [], warranty: '' }],
+      items: [...prevData.items, { id: '', quantity: 1, accessories: [], warranty: '' }],
     }));
   };
 
   const handleRemoveItem = (index) => {
     setOrderFormData(prevData => ({
       ...prevData,
-      order_items: prevData.order_items.filter((_, i) => i !== index),
+      items: prevData.items.filter((_, i) => i !== index),
     }));
   };
 
   const handleItemChange = (index, field, value) => {
     setOrderFormData(prevData => {
-      const updatedItems = [...prevData.order_items];
+      const updatedItems = [...prevData.items];
       updatedItems[index] = { 
         ...updatedItems[index], 
         [field]: value,
       };
       return { 
         ...prevData, 
-        order_items: updatedItems
+        items: updatedItems
       };
     });
   };
 
   const handleAccessoryChange = (itemIndex, accIndex, value) => {
     setOrderFormData(prevData => {
-      const updatedItems = [...prevData.order_items];
+      const updatedItems = [...prevData.items];
       const updatedAccessories = [...(updatedItems[itemIndex].accessories || [])];
       updatedAccessories[accIndex] = value;
       updatedItems[itemIndex] = { 
@@ -103,35 +103,35 @@ function OrderManagement() {
       };
       return { 
         ...prevData, 
-        order_items: updatedItems
+        items: updatedItems
       };
     });
   };
 
   const handleAddAccessory = (itemIndex) => {
     setOrderFormData(prevData => {
-      const updatedItems = [...prevData.order_items];
+      const updatedItems = [...prevData.items];
       updatedItems[itemIndex] = { 
         ...updatedItems[itemIndex], 
         accessories: [...(updatedItems[itemIndex].accessories || []), '']
       };
       return { 
         ...prevData, 
-        order_items: updatedItems
+        items: updatedItems
       };
     });
   };
 
   const handleWarrantyChange = (itemIndex, value) => {
     setOrderFormData(prevData => {
-      const updatedItems = [...prevData.order_items];
+      const updatedItems = [...prevData.items];
       updatedItems[itemIndex] = { 
         ...updatedItems[itemIndex], 
         warranty: value
       };
       return { 
         ...prevData, 
-        order_items: updatedItems
+        items: updatedItems
       };
     });
   };
@@ -187,11 +187,11 @@ function OrderManagement() {
     console.log('Selected Order:', order);
     setSelectedOrder(order);
     
-    // Parse order_items if it's a string
-    let parsedItems = order.order_items;
-    if (typeof order.order_items === 'string') {
+    // Parse items if it's a string
+    let parsedItems = order.items;
+    if (typeof order.items === 'string') {
       try {
-        parsedItems = JSON.parse(order.order_items);
+        parsedItems = JSON.parse(order.items);
       } catch (error) {
         console.error('Error parsing order items:', error);
         parsedItems = [];
@@ -200,7 +200,7 @@ function OrderManagement() {
 
     setOrderFormData({
       id: order.id,
-      user_name: order.user_name,
+      name: order.name,
       street: order.street,
       city: order.city,
       state: order.state,
@@ -219,7 +219,7 @@ function OrderManagement() {
   const clearOrderForm = () => {
     setOrderFormData({
       id: '',
-      user_name: '',
+      name: '',
       street: '',
       city: '',
       state: '',
@@ -236,7 +236,7 @@ function OrderManagement() {
   };
 
   const filteredOrders = selectedUser
-    ? orders.filter(order => order.user_name === selectedUser)
+    ? orders.filter(order => order.name === selectedUser)
     : orders;
 
   if (isLoading) {
@@ -270,7 +270,7 @@ function OrderManagement() {
       {/* Order Form */}
       <form onSubmit={handleOrderSubmit} className="bg-white p-4 border border-gray-300 rounded-md shadow-md mb-6">
         <h3 className="text-xl font-semibold mb-4">
-          {selectedOrder ? `Edit Order for ${orderFormData.user_name}` : 'Add New Order'}
+          {selectedOrder ? `Edit Order for ${orderFormData.name}` : 'Add New Order'}
         </h3>
 
         {/* Customer Name */}
@@ -279,9 +279,9 @@ function OrderManagement() {
           <input
             type="text"
             id="userName"
-            name="user_name"
-            value={orderFormData.user_name}
-            onChange={(e) => setOrderFormData(prevData => ({...prevData, user_name: e.target.value}))}
+            name="name"
+            value={orderFormData.name}
+            onChange={(e) => setOrderFormData(prevData => ({...prevData, name: e.target.value}))}
             required
             className="p-2 border border-gray-300 rounded-md w-full"
           />
@@ -548,7 +548,7 @@ function OrderManagement() {
       {filteredOrders.map((order) => (
         <tr key={order.id} className="border-b">
           <td className="p-2">{order.id}</td>
-          <td className="p-2">{order.user_name}</td>
+          <td className="p-2">{order.name}</td>
           <td className="p-2">{order.street}, {order.city}, {order.state} {order.zip_code}</td>
           <td className="p-2">{order.credit_card}</td>
           <td className="p-2">{order.delivery_option}</td>
@@ -558,7 +558,7 @@ function OrderManagement() {
           <td className="p-2">{order.confirmation_number}</td>
           <td className="p-2">{order.delivery_date}</td>
           <td className="p-2">
-            {order.order_items && JSON.parse(order.order_items).map((item, idx) => (
+            {order.order_items && JSON.parse(order.items).map((item, idx) => (
               <div key={idx}>
                 {products && products.find(p => p.id === item.id)?.name} x {item.quantity}
                 <br />

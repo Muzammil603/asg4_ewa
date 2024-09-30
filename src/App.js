@@ -20,15 +20,17 @@ import Trending from './pages/Trending';
 function App() {
   const [cartItems, setCartItems] = useState([]);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userRole, setUserRole] = useState('');
   const [customerId, setCustomerId] = useState('');
   const [customerName, setCustomerName] = useState('');
 
   useEffect(() => {
-    const userRole = localStorage.getItem('userRole');
+    const role = localStorage.getItem('userRole');
     const id = localStorage.getItem('userId');
     const name = localStorage.getItem('userName');
 
-    setIsLoggedIn(!!userRole);
+    setIsLoggedIn(!!role);
+    setUserRole(role || '');
     setCustomerId(id || '');
     setCustomerName(name || '');
   }, []);
@@ -50,6 +52,7 @@ function App() {
     setCartItems([]);
     setCustomerId('');
     setCustomerName('');
+    setUserRole('');
   };
 
   return (
@@ -65,14 +68,19 @@ function App() {
             <Route path="/products/:id" element={isLoggedIn ? <ProductDetails addToCart={addToCart} /> : <Navigate to="/auth" />} />
             <Route path="/cart" element={isLoggedIn ? <Cart cartItems={cartItems} removeFromCart={removeFromCart} /> : <Navigate to="/auth" />} />
             <Route path="/checkout" element={isLoggedIn ? <Checkout cartItems={cartItems} customerName={customerName} /> : <Navigate to="/auth" />} />
-            <Route path="/admin" element={isLoggedIn ? <AdminPanel /> : <Navigate to="/auth" />} />
-            <Route path="/salesman" element={isLoggedIn ? <SalesmanPanel /> : <Navigate to="/auth" />} />
+
+            {/* Role-based access control */}
+            <Route path="/admin" element={isLoggedIn && userRole === 'storeManager' ? <AdminPanel /> : <Navigate to="/" />} />
+            <Route path="/salesman" element={isLoggedIn && userRole === 'salesman' ? <SalesmanPanel /> : <Navigate to="/" />} />
             <Route path="/register" element={isLoggedIn ? <CustomerRegistration /> : <Navigate to="/auth" />} />
             <Route path="/order-history" element={isLoggedIn ? <OrderHistory customerId={customerId} /> : <Navigate to="/auth" />} />
-            <Route path="*" element={<Navigate to={isLoggedIn ? "/" : "/auth"} />} />
+
             <Route path="/product-review-form" element={isLoggedIn ? <ProductReviewForm /> : <Navigate to="/auth" />} />
             <Route path="/product-reviews" element={isLoggedIn ? <ProductReviews /> : <Navigate to="/auth" />} />
             <Route path="/trending" element={isLoggedIn ? <Trending /> : <Navigate to="/auth" />} />
+
+            {/* Redirect unknown routes */}
+            <Route path="*" element={<Navigate to={isLoggedIn ? "/" : "/auth"} />} />
           </Routes>
         </main>
         <Footer />
