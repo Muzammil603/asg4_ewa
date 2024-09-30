@@ -1,4 +1,3 @@
-// src/components/Header.js
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -8,7 +7,7 @@ function Header({ handleLogout, setIsLoggedIn }) {
 
   const handleLogoutClick = () => {
     handleLogout();
-    setIsLoggedIn(false);  // Ensure this function is properly passed and used
+    setIsLoggedIn(false);
     navigate('/logout');
   };
 
@@ -19,6 +18,7 @@ function Header({ handleLogout, setIsLoggedIn }) {
           <li><Link to="/" className="font-bold hover:text-gray-200">Home</Link></li>
           <li><Link to="/products" className="font-bold hover:text-gray-200">Products</Link></li>
           <li><Link to="/cart" className="font-bold hover:text-gray-200">Cart</Link></li>
+          <li><Link to="/trending" className="font-bold hover:text-gray-200">Trending</Link></li>
           {userRole === 'storeManager' && (
             <li><Link to="/admin" className="font-bold hover:text-gray-200">Admin Panel</Link></li>
           )}

@@ -36,6 +36,7 @@ const ProductReviewForm = () => {
           axios.get('http://127.0.0.1:5001/api/store-locations')
         ]);
         setProducts(productsResponse.data);
+        console.log(products);
         setStoreLocations(storeLocationsResponse.data);
       } catch (err) {
         setError('Failed to fetch data. Please try again later.');
@@ -56,7 +57,7 @@ const ProductReviewForm = () => {
       if (name === 'ProductModelName') {
         const selectedProduct = products.find(p => p.name === value);
         if (selectedProduct) {
-          newData.ProductCategoryName = selectedProduct.category || selectedProduct.name;
+          newData.ProductCategoryName = selectedProduct.category_name || selectedProduct.name;
           newData.ProductPrice = selectedProduct.price;
           newData.ManufacturerName = selectedProduct.manufacturer || '';
         }
@@ -77,11 +78,11 @@ const ProductReviewForm = () => {
           newData.StoreState = selectedStore.state;
         }
       }
-
+      console.log(products);
       return newData;
     });
   };
-
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {

@@ -15,6 +15,7 @@ import LogoutConfirmation from './pages/LogoutConfirmation';
 import OrderHistory from './pages/OrderHistory';
 import ProductReviewForm from './pages/ProductReviewForm';
 import ProductReviews from './pages/ProductReviews';
+import Trending from './pages/Trending';
 
 function App() {
   const [cartItems, setCartItems] = useState([]);
@@ -71,6 +72,7 @@ function App() {
             <Route path="*" element={<Navigate to={isLoggedIn ? "/" : "/auth"} />} />
             <Route path="/product-review-form" element={isLoggedIn ? <ProductReviewForm /> : <Navigate to="/auth" />} />
             <Route path="/product-reviews" element={isLoggedIn ? <ProductReviews /> : <Navigate to="/auth" />} />
+            <Route path="/trending" element={isLoggedIn ? <Trending /> : <Navigate to="/auth" />} />
           </Routes>
         </main>
         <Footer />
