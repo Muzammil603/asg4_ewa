@@ -11,11 +11,14 @@ import AdminPanel from './pages/AdminPanel';
 import SalesmanPanel from './pages/SalesmanPanel';
 import CustomerRegistration from './pages/CustomerRegistration';
 import AuthPage from './pages/AuthPage';
-import LogoutConfirmation from './pages/LogoutConfirmation';
+import LogoutConfirmation from './pages/LogoutConfirmation'; // Make sure this is properly implemented
 import OrderHistory from './pages/OrderHistory';
 import ProductReviewForm from './pages/ProductReviewForm';
 import ProductReviews from './pages/ProductReviews';
 import Trending from './pages/Trending';
+import ManagerDashboard from './pages/ManagerDashboard';
+import ProtectedRoute from './components/ProtectedRoute';
+
 
 function App() {
   const [cartItems, setCartItems] = useState([]);
@@ -63,21 +66,32 @@ function App() {
           <Routes>
             <Route path="/" element={isLoggedIn ? <Home /> : <Navigate to="/auth" />} />
             <Route path="/auth" element={!isLoggedIn ? <AuthPage setIsLoggedIn={setIsLoggedIn} setCustomerName={setCustomerName} /> : <Navigate to="/" />} />
+            
+            {/* Define the logout route properly */}
             <Route path="/logout" element={<LogoutConfirmation />} />
+
             <Route path="/products" element={isLoggedIn ? <Products /> : <Navigate to="/auth" />} />
             <Route path="/products/:id" element={isLoggedIn ? <ProductDetails addToCart={addToCart} /> : <Navigate to="/auth" />} />
             <Route path="/cart" element={isLoggedIn ? <Cart cartItems={cartItems} removeFromCart={removeFromCart} /> : <Navigate to="/auth" />} />
             <Route path="/checkout" element={isLoggedIn ? <Checkout cartItems={cartItems} customerName={customerName} /> : <Navigate to="/auth" />} />
 
             {/* Role-based access control */}
-            <Route path="/admin" element={isLoggedIn && userRole === 'storeManager' ? <AdminPanel /> : <Navigate to="/" />} />
-            <Route path="/salesman" element={isLoggedIn && userRole === 'salesman' ? <SalesmanPanel /> : <Navigate to="/" />} />
+            <Route path="/admin" element={isLoggedIn  ? <AdminPanel /> : <Navigate to="/" />} />
+            <Route path="/salesman" element={isLoggedIn  ? <SalesmanPanel /> : <Navigate to="/" />} />
             <Route path="/register" element={isLoggedIn ? <CustomerRegistration /> : <Navigate to="/auth" />} />
             <Route path="/order-history" element={isLoggedIn ? <OrderHistory customerId={customerId} /> : <Navigate to="/auth" />} />
 
             <Route path="/product-review-form" element={isLoggedIn ? <ProductReviewForm /> : <Navigate to="/auth" />} />
             <Route path="/product-reviews" element={isLoggedIn ? <ProductReviews /> : <Navigate to="/auth" />} />
             <Route path="/trending" element={isLoggedIn ? <Trending /> : <Navigate to="/auth" />} />
+            <Route
+                path="/manager-dashboard"
+                element={
+                  <ProtectedRoute allowedRoles={['storeManager']}>
+                    <ManagerDashboard />
+                  </ProtectedRoute>
+                  }
+              />
 
             {/* Redirect unknown routes */}
             <Route path="*" element={<Navigate to={isLoggedIn ? "/" : "/auth"} />} />

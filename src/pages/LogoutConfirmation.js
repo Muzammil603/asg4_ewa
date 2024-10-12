@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 function LogoutConfirmation() {
   const navigate = useNavigate();
-
+  console.log('LogoutConfirmation.js: LogoutConfirmation()');
   const handleContinue = () => {
     navigate('/auth');
   };

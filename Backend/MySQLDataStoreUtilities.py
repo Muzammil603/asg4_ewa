@@ -53,6 +53,8 @@ class Product(db.Model):
     category = db.relationship('Category', backref=db.backref('products', lazy=True))
     accessories = db.Column(db.Text)  # Store accessories as JSON text
     warranty_options = db.Column(db.Text)  # Store warranty options as JSON text
+    retailer_discount = db.Column(db.Float, default=0.0)  # Retailer special discount
+    manufacturer_rebate = db.Column(db.Float, default=0.0)  # Manufacturer rebate
 
 # Define the CartItem model
 class CartItem(db.Model):
@@ -185,71 +187,280 @@ with app.app_context():
             {'id': str(uuid.uuid4()), 'name': 'Smart Plug', 'price': 14.99}
         ]
 
-        # Add products to each category
-        products = [
-            # Smart Doorbells
-            Product(name="Ring Video Doorbell", description="Smart doorbell with HD video and motion detection.",
-                    price=199.99, images='', category_id=categories[0].id, accessories=json.dumps(sample_accessories[:2])),
-            Product(name="Nest Hello", description="Wired doorbell with HD video and person alerts.",
-                    price=229.99, images='', category_id=categories[0].id, accessories=json.dumps(sample_accessories)),
-            Product(name="Arlo Video Doorbell", description="Smart doorbell with wide-angle view and HDR.",
-                    price=149.99, images='', category_id=categories[0].id, accessories=json.dumps(sample_accessories)),
-            Product(name="SimpliSafe Doorbell", description="Easy-to-install doorbell with video and audio.",
-                    price=169.99, images='', category_id=categories[0].id, accessories=json.dumps(sample_accessories[:1])),
-            Product(name="Eufy Security Doorbell", description="Battery-powered video doorbell with 2K resolution.",
-                    price=179.99, images='', category_id=categories[0].id, accessories=json.dumps(sample_accessories[1:])),
+       
+        # Helper function to generate random rebate or discount
+    def random_discount_or_rebate():
+    # Randomly return a rebate, discount, both, or neither
+        rebate = round(random.uniform(2, 15), 2) if random.choice([True, False]) else 0
+        discount = round(random.uniform(2, 15), 2) if random.choice([True, False]) else 0
+        return rebate, discount
+    
 
-            # Smart Doorlocks
-            Product(name="August Smart Lock", description="Keyless entry and remote control for your door.",
-                    price=229.99, images='', category_id=categories[1].id, accessories=json.dumps(sample_accessories[:2])),
-            Product(name="Yale Assure Lock", description="Touchscreen smart lock with keyless entry.",
-                    price=199.99, images='', category_id=categories[1].id, accessories=json.dumps(sample_accessories)),
-            Product(name="Schlage Encode", description="Smart lock with built-in WiFi.",
-                    price=249.99, images='', category_id=categories[1].id, accessories=json.dumps(sample_accessories)),
-            Product(name="Ultraloq U-Bolt Pro", description="Smart lock with fingerprint ID.",
-                    price=159.99, images='', category_id=categories[1].id, accessories=json.dumps(sample_accessories[:1])),
-            Product(name="Kwikset SmartCode", description="Deadbolt smart lock with customizable entry codes.",
-                    price=179.99, images='', category_id=categories[1].id, accessories=json.dumps(sample_accessories[1:])),
+# Add products to each category
+    products = [
+        # Smart Doorbells
+        Product(
+            name="Ring Video Doorbell", 
+            description="Smart doorbell with HD video and motion detection.",
+            price=199.99, 
+            images='', 
+            category_id=categories[0].id, 
+            accessories=json.dumps(sample_accessories[:2]),
+            manufacturer_rebate=random_discount_or_rebate()[0], 
+            retailer_discount=random_discount_or_rebate()[1]
+        ),
+        Product(
+            name="Nest Hello", 
+            description="Wired doorbell with HD video and person alerts.",
+            price=229.99, 
+            images='', 
+            category_id=categories[0].id, 
+            accessories=json.dumps(sample_accessories),
+            manufacturer_rebate=random_discount_or_rebate()[0], 
+            retailer_discount=random_discount_or_rebate()[1]
+        ),
+        Product(
+            name="Arlo Video Doorbell", 
+            description="Smart doorbell with wide-angle view and HDR.",
+            price=149.99, 
+            images='', 
+            category_id=categories[0].id, 
+            accessories=json.dumps(sample_accessories),
+            manufacturer_rebate=random_discount_or_rebate()[0], 
+            retailer_discount=random_discount_or_rebate()[1]
+        ),
+        Product(
+            name="SimpliSafe Doorbell", 
+            description="Easy-to-install doorbell with video and audio.",
+            price=169.99, 
+            images='', 
+            category_id=categories[0].id, 
+            accessories=json.dumps(sample_accessories[:1]),
+            manufacturer_rebate=random_discount_or_rebate()[0], 
+            retailer_discount=random_discount_or_rebate()[1]
+        ),
+        Product(
+            name="Eufy Security Doorbell", 
+            description="Battery-powered video doorbell with 2K resolution.",
+            price=179.99, 
+            images='', 
+            category_id=categories[0].id, 
+            accessories=json.dumps(sample_accessories[1:]),
+            manufacturer_rebate=random_discount_or_rebate()[0], 
+            retailer_discount=random_discount_or_rebate()[1]
+        ),
 
-            # Smart Speakers
-            Product(name="Amazon Echo", description="Voice-controlled smart speaker with Alexa.",
-                    price=99.99, images='', category_id=categories[2].id, accessories=json.dumps(sample_accessories[:2])),
-            Product(name="Google Nest Audio", description="Smart speaker with Google Assistant.",
-                    price=89.99, images='', category_id=categories[2].id, accessories=json.dumps(sample_accessories)),
-            Product(name="Apple HomePod Mini", description="Smart speaker with Siri integration.",
-                    price=99.99, images='', category_id=categories[2].id, accessories=json.dumps(sample_accessories)),
-            Product(name="Sonos One", description="Smart speaker with voice control and excellent sound.",
-                    price=199.99, images='', category_id=categories[2].id, accessories=json.dumps(sample_accessories[:1])),
-            Product(name="Bose Home Speaker 500", description="Smart speaker with Alexa and Google Assistant.",
-                    price=299.99, images='', category_id=categories[2].id, accessories=json.dumps(sample_accessories[1:])),
+        # Smart Doorlocks
+        Product(
+            name="August Smart Lock", 
+            description="Keyless entry and remote control for your door.",
+            price=229.99, 
+            images='', 
+            category_id=categories[1].id, 
+            accessories=json.dumps(sample_accessories[:2]),
+            manufacturer_rebate=random_discount_or_rebate()[0], 
+            retailer_discount=random_discount_or_rebate()[1]
+        ),
+        Product(
+            name="Yale Assure Lock", 
+            description="Touchscreen smart lock with keyless entry.",
+            price=199.99, 
+            images='', 
+            category_id=categories[1].id, 
+            accessories=json.dumps(sample_accessories),
+            manufacturer_rebate=random_discount_or_rebate()[0], 
+            retailer_discount=random_discount_or_rebate()[1]
+        ),
+        Product(
+            name="Schlage Encode", 
+            description="Smart lock with built-in WiFi.",
+            price=249.99, 
+            images='', 
+            category_id=categories[1].id, 
+            accessories=json.dumps(sample_accessories),
+            manufacturer_rebate=random_discount_or_rebate()[0], 
+            retailer_discount=random_discount_or_rebate()[1]
+        ),
+        Product(
+            name="Ultraloq U-Bolt Pro", 
+            description="Smart lock with fingerprint ID.",
+            price=159.99, 
+            images='', 
+            category_id=categories[1].id, 
+            accessories=json.dumps(sample_accessories[:1]),
+            manufacturer_rebate=random_discount_or_rebate()[0], 
+            retailer_discount=random_discount_or_rebate()[1]
+        ),
+        Product(
+            name="Kwikset SmartCode", 
+            description="Deadbolt smart lock with customizable entry codes.",
+            price=179.99, 
+            images='', 
+            category_id=categories[1].id, 
+            accessories=json.dumps(sample_accessories[1:]),
+            manufacturer_rebate=random_discount_or_rebate()[0], 
+            retailer_discount=random_discount_or_rebate()[1]
+        ),
 
-            # Smart Lightings
-            Product(name="Philips Hue Bulb", description="Smart light bulb with app control.",
-                    price=49.99, images='', category_id=categories[3].id, accessories=json.dumps(sample_accessories[:2])),
-            Product(name="LIFX Smart Bulb", description="Color-changing smart bulb.",
-                    price=59.99, images='', category_id=categories[3].id, accessories=json.dumps(sample_accessories)),
-            Product(name="Nanoleaf Light Panels", description="Customizable LED light panels.",
-                    price=199.99, images='', category_id=categories[3].id, accessories=json.dumps(sample_accessories)),
-            Product(name="Wyze Bulb", description="Affordable smart bulb with voice control.",
-                    price=19.99, images='', category_id=categories[3].id, accessories=json.dumps(sample_accessories[:1])),
-            Product(name="TP-Link Kasa Bulb", description="Smart bulb with adjustable brightness.",
-                    price=29.99, images='', category_id=categories[3].id, accessories=json.dumps(sample_accessories[1:])),
+        # Smart Speakers
+        Product(
+            name="Amazon Echo", 
+            description="Voice-controlled smart speaker with Alexa.",
+            price=99.99, 
+            images='', 
+            category_id=categories[2].id, 
+            accessories=json.dumps(sample_accessories[:2]),
+            manufacturer_rebate=random_discount_or_rebate()[0], 
+            retailer_discount=random_discount_or_rebate()[1]
+        ),
+        Product(
+            name="Google Nest Audio", 
+            description="Smart speaker with Google Assistant.",
+            price=89.99, 
+            images='', 
+            category_id=categories[2].id, 
+            accessories=json.dumps(sample_accessories),
+            manufacturer_rebate=random_discount_or_rebate()[0], 
+            retailer_discount=random_discount_or_rebate()[1]
+        ),
+        Product(
+            name="Apple HomePod Mini", 
+            description="Smart speaker with Siri integration.",
+            price=99.99, 
+            images='', 
+            category_id=categories[2].id, 
+            accessories=json.dumps(sample_accessories),
+            manufacturer_rebate=random_discount_or_rebate()[0], 
+            retailer_discount=random_discount_or_rebate()[1]
+        ),
+        Product(
+            name="Sonos One", 
+            description="Smart speaker with voice control and excellent sound.",
+            price=199.99, 
+            images='', 
+            category_id=categories[2].id, 
+            accessories=json.dumps(sample_accessories[:1]),
+            manufacturer_rebate=random_discount_or_rebate()[0], 
+            retailer_discount=random_discount_or_rebate()[1]
+        ),
+        Product(
+            name="Bose Home Speaker 500", 
+            description="Smart speaker with Alexa and Google Assistant.",
+            price=299.99, 
+            images='', 
+            category_id=categories[2].id, 
+            accessories=json.dumps(sample_accessories[1:]),
+            manufacturer_rebate=random_discount_or_rebate()[0], 
+            retailer_discount=random_discount_or_rebate()[1]
+        ),
 
-            # Smart Thermostats
-            Product(name="Nest Learning Thermostat", description="Smart thermostat that learns your preferences.",
-                    price=249.99, images='', category_id=categories[4].id, accessories=json.dumps(sample_accessories[:2])),
-            Product(name="Ecobee SmartThermostat", description="Thermostat with voice control and remote sensors.",
-                    price=219.99, images='', category_id=categories[4].id, accessories=json.dumps(sample_accessories)),
-            Product(name="Honeywell T9", description="Smart thermostat with room sensors.",
-                    price=199.99, images='', category_id=categories[4].id, accessories=json.dumps(sample_accessories)),
-            Product(name="Emerson Sensi", description="Smart thermostat with mobile app control.",
-                    price=129.99, images='', category_id=categories[4].id, accessories=json.dumps(sample_accessories[:1])),
-            Product(name="Lux Kono Smart Thermostat", description="Stylish thermostat with smart features.",
-                    price=139.99, images='', category_id=categories[4].id, accessories=json.dumps(sample_accessories[1:]))
-        ]
+        # Smart Lightings
+        Product(
+            name="Philips Hue Bulb", 
+            description="Smart light bulb with app control.",
+            price=49.99, 
+            images='', 
+            category_id=categories[3].id, 
+            accessories=json.dumps(sample_accessories[:2]),
+            manufacturer_rebate=random_discount_or_rebate()[0], 
+            retailer_discount=random_discount_or_rebate()[1]
+        ),
+        Product(
+            name="LIFX Smart Bulb", 
+            description="Color-changing smart bulb.",
+            price=59.99, 
+            images='', 
+            category_id=categories[3].id, 
+            accessories=json.dumps(sample_accessories),
+            manufacturer_rebate=random_discount_or_rebate()[0], 
+            retailer_discount=random_discount_or_rebate()[1]
+        ),
+        Product(
+            name="Nanoleaf Light Panels", 
+            description="Customizable LED light panels.",
+            price=199.99, 
+            images='', 
+            category_id=categories[3].id, 
+            accessories=json.dumps(sample_accessories),
+            manufacturer_rebate=random_discount_or_rebate()[0], 
+            retailer_discount=random_discount_or_rebate()[1]
+        ),
+        Product(
+            name="Wyze Bulb", 
+            description="Affordable smart bulb with voice control.",
+            price=29.99, 
+            images='', 
+            category_id=categories[3].id, 
+            accessories=json.dumps(sample_accessories[:1]),
+            manufacturer_rebate=random_discount_or_rebate()[0], 
+            retailer_discount=random_discount_or_rebate()[1]
+        ),
+        Product(
+            name="TP-Link Kasa Bulb", 
+            description="Smart bulb with adjustable brightness.",
+            price=29.99, 
+            images='', 
+            category_id=categories[3].id, 
+            accessories=json.dumps(sample_accessories[1:]),
+            manufacturer_rebate=random_discount_or_rebate()[0], 
+            retailer_discount=random_discount_or_rebate()[1]
+        ),
 
-        db.session.add_all(products)
-        db.session.commit()
+        # Smart Thermostats
+        Product(
+            name="Nest Learning Thermostat", 
+            description="Smart thermostat that learns your preferences.",
+            price=249.99, 
+            images='', 
+            category_id=categories[4].id, 
+            accessories=json.dumps(sample_accessories[:2]),
+            manufacturer_rebate=random_discount_or_rebate()[0], 
+            retailer_discount=random_discount_or_rebate()[1]
+        ),
+        Product(
+            name="Ecobee SmartThermostat", 
+            description="Thermostat with voice control and remote sensors.",
+            price=219.99, 
+            images='', 
+            category_id=categories[4].id, 
+            accessories=json.dumps(sample_accessories),
+            manufacturer_rebate=random_discount_or_rebate()[0], 
+            retailer_discount=random_discount_or_rebate()[1]
+        ),
+        Product(
+            name="Honeywell T9", 
+            description="Smart thermostat with room sensors.",
+            price=199.99, 
+            images='', 
+            category_id=categories[4].id, 
+            accessories=json.dumps(sample_accessories),
+            manufacturer_rebate=random_discount_or_rebate()[0], 
+            retailer_discount=random_discount_or_rebate()[1]
+        ),
+        Product(
+            name="Emerson Sensi", 
+            description="Smart thermostat with mobile app control.",
+            price=129.99, 
+            images='', 
+            category_id=categories[4].id, 
+            accessories=json.dumps(sample_accessories[:1]),
+            manufacturer_rebate=random_discount_or_rebate()[0], 
+            retailer_discount=random_discount_or_rebate()[1]
+        ),
+        Product(
+            name="Lux Kono Smart Thermostat", 
+            description="Stylish thermostat with smart features.",
+            price=139.99, 
+            images='', 
+            category_id=categories[4].id, 
+            accessories=json.dumps(sample_accessories[1:]),
+            manufacturer_rebate=random_discount_or_rebate()[0], 
+            retailer_discount=random_discount_or_rebate()[1]
+        )
+    ]
+
+    db.session.add_all(products)
+    db.session.commit()
     create_sample_data()
     if not User.query.first():
         sample_users = [
@@ -293,7 +504,10 @@ def get_products():
             'images': product.images,
             'category_id': product.category_id,
             'category_name': product.category.name,
-            'accessories': json.loads(product.accessories) if product.accessories else []
+            'accessories': json.loads(product.accessories) if product.accessories else [],
+            'manufacturer_rebate': product.manufacturer_rebate,
+            'retailer_discount': product.retailer_discount
+            
         }
         for product in products
     ]
@@ -311,7 +525,9 @@ def get_product(product_id):
             'images': product.images,
             'category_id': product.category_id,
             'accessories': json.loads(product.accessories) if product.accessories else [],
-            'warranty_options': ['No Warranty', '1 Year', '2 Years']
+            'warranty_options': ['No Warranty', '1 Year', '2 Years'],
+            'manufacturer_rebate': product.manufacturer_rebate,
+            'retailer_discount': product.retailer_discount
         }
         return jsonify(product_data), 200
     else:
@@ -504,7 +720,9 @@ def add_product():
             description=data['description'],
             price=data['price'],
             category_id=data['category'],
-            accessories=json.dumps(data['accessories'])
+            accessories=json.dumps(data['accessories']),
+            manufacturer_rebate=data.get('manufacturer_rebate', 0.0),
+            retailer_discount=data.get('retailer_discount', 0.0)
         )
         db.session.add(new_product)
         db.session.commit()
@@ -527,6 +745,9 @@ def update_product(product_id):
         product.price = data['price']
         product.category_id = data['category']
         product.accessories = json.dumps(data['accessories'])
+        product.manufacturer_rebate = data.get('manufacturer_rebate', 0.0)
+        product.retailer_discount = data.get('retailer_discount', 0.0) 
+        
         db.session.commit()
         return jsonify({'message': 'Product updated successfully'}), 200
     except Exception as e:

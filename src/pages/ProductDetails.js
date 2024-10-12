@@ -44,7 +44,8 @@ function ProductDetails() {
     if (warranty === '1 Year') warrantyCost = productPrice * 0.1;
     if (warranty === '2 Years') warrantyCost = productPrice * 0.2;
 
-    const totalPrice = productPrice + accessoriesPrice + warrantyCost;
+    const finalProductPrice = productPrice - product.retailer_discount - product.manufacturer_rebate;
+    const totalPrice = finalProductPrice + accessoriesPrice + warrantyCost;
     console.log('Calculated total price:', totalPrice);
     return totalPrice;
   };
@@ -154,6 +155,21 @@ function ProductDetails() {
         ))}
       </select>
 
+      {product.retailer_discount > 0 ? (
+        <p className="text-green-600 mb-2">Retailer Discount: -${product.retailer_discount.toFixed(2)}</p>
+      ) : (
+        <p className="text-gray-600 mb-2">No Retailer Discount</p>
+      )}
+
+      {product.manufacturer_rebate > 0 ? (
+        <p className="text-blue-600 mb-2">Manufacturer Rebate: -${product.manufacturer_rebate.toFixed(2)}</p>
+      ) : (
+        <p className="text-gray-600 mb-2">No Manufacturer Rebate</p>
+      )}
+
+      {product.retailer_discount === 0 && product.manufacturer_rebate === 0 && (
+        <p className="text-red-600 mb-2">No Offers Available</p>
+      )}
       {/* Total Price */}
       <p className="mt-4 text-lg font-semibold">Total Price: ${calculateTotalPrice().toFixed(2)}</p>
 

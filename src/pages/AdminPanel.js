@@ -9,7 +9,9 @@ function AdminPanel() {
     description: '',
     price: '',
     category: '',
-    accessories: []
+    accessories: [],
+    retailer_discount: '', // Add retailer discount
+    manufacturer_rebate: '' // Add manufacturer rebate
   });
   const [accessoryData, setAccessoryData] = useState({
     name: '',
@@ -58,7 +60,9 @@ function AdminPanel() {
     e.preventDefault();
     const newProduct = {
       ...formData,
-      accessories: formData.accessories
+      accessories: formData.accessories,
+      retailer_discount: parseFloat(formData.retailer_discount) || 0, // Ensure float value
+      manufacturer_rebate: parseFloat(formData.manufacturer_rebate) || 0 // Ensure float value
     };
 
     fetch('http://127.0.0.1:5001/api/products/add', {
@@ -79,7 +83,9 @@ function AdminPanel() {
             description: '',
             price: '',
             category: '',
-            accessories: []
+            accessories: [],
+            retailer_discount: '',
+            manufacturer_rebate: ''
           });
         }
       })
@@ -103,11 +109,16 @@ function AdminPanel() {
 
   const handleSelectProduct = (product) => {
     setSelectedProduct(product);
-    setFormData(product);
+    setFormData({
+      ...product,
+      retailer_discount: product.retailer_discount || '', // Load existing discount
+      manufacturer_rebate: product.manufacturer_rebate || '' // Load existing rebate
+    });
   };
 
   const handleUpdateProduct = (e) => {
     e.preventDefault();
+    
     fetch(`http://127.0.0.1:5001/api/products/update/${selectedProduct.id}`, {
       method: 'PUT',
       headers: {
@@ -127,7 +138,9 @@ function AdminPanel() {
             description: '',
             price: '',
             category: '',
-            accessories: []
+            accessories: [],
+            retailer_discount: '',
+            manufacturer_rebate: ''
           });
         }
       })
@@ -141,9 +154,12 @@ function AdminPanel() {
       description: '',
       price: '',
       category: '',
-      accessories: []
+      accessories: [],
+      retailer_discount: '',
+      manufacturer_rebate: ''
     });
   };
+  
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-gray-100 min-h-screen">
@@ -241,6 +257,30 @@ function AdminPanel() {
             ))}
           </ul>
         </div>
+        <div className="mb-4">
+        <label htmlFor="retailer_discount" className="block text-sm font-medium text-gray-700">Retailer Discount:</label>
+        <input
+          type="number"
+          id="retailer_discount"
+          name="retailer_discount"
+          value={formData.retailer_discount}
+          onChange={handleInputChange}
+          className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
+        />
+      </div>
+
+      <div className="mb-4">
+        <label htmlFor="manufacturer_rebate" className="block text-sm font-medium text-gray-700">Manufacturer Rebate:</label>
+        <input
+          type="number"
+          id="manufacturer_rebate"
+          name="manufacturer_rebate"
+          value={formData.manufacturer_rebate}
+          onChange={handleInputChange}
+          className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
+        />
+      </div>
+
         <div className="flex gap-4">
           <button
             type="submit"
