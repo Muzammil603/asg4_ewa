@@ -10,6 +10,7 @@ import random
 from MongoDBDataStoreUtilities import mongo_bp
 import mysql.connector
 from bson import ObjectId
+import xml.etree.ElementTree as ET
 
 
 app = Flask(__name__)
@@ -23,7 +24,8 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-
+# Initialize HashMap (Dictionary in Python)
+products_map = {}
 # Define the Category model
 
 class User(db.Model):
@@ -44,17 +46,44 @@ class Category(db.Model):
 
 # Define the Product model
 class Product(db.Model):
+    __tablename__ = 'product'
     id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     name = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text)
     price = db.Column(db.Float, nullable=False)
-    images = db.Column(db.Text)  # Store JSON as text in MySQL
+    images = db.Column(db.Text)
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
     category = db.relationship('Category', backref=db.backref('products', lazy=True))
-    accessories = db.Column(db.Text)  # Store accessories as JSON text
-    warranty_options = db.Column(db.Text)  # Store warranty options as JSON text
-    retailer_discount = db.Column(db.Float, default=0.0)  # Retailer special discount
-    manufacturer_rebate = db.Column(db.Float, default=0.0)  # Manufacturer rebate
+    accessories = db.Column(db.Text)
+    warranty_options = db.Column(db.Text)
+    retailer_discount = db.Column(db.Float, default=0.0)
+    manufacturer_rebate = db.Column(db.Float, default=0.0)
+    available_items = db.Column(db.Integer, default=0)  # New field for inventory
+    
+
+    
+    
+    from sqlalchemy import Index
+
+    __table_args__ = (
+        Index('ix_product_name', 'name'),  # Create an index on the name field
+    )
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'description': self.description,
+            'price': self.price,
+            'retailer_discount': self.retailer_discount,
+            'manufacturer_rebate': self.manufacturer_rebate,
+            'category_id': self.category_id,
+            'category_name': self.category.name,
+            'accessories': json.loads(self.accessories) if self.accessories else [],
+            'warranty_options': json.loads(self.warranty_options) if self.warranty_options else [],
+            'available_items': self.available_items
+            
+        }
 
 # Define the CartItem model
 class CartItem(db.Model):
@@ -166,6 +195,76 @@ with app.app_context():
 
         # Re-enable foreign key checks
         connection.execute(text('SET FOREIGN_KEY_CHECKS = 1;'))
+    
+    # Product management functions
+def read_products_from_xml(file_path):
+    tree = ET.parse(file_path)
+    root = tree.getroot()
+    
+    for product_elem in root.findall('.//product'):
+        product_id = str(uuid.uuid4())
+        name = product_elem.find('name').text
+        price = float(product_elem.find('price').text)
+        description = product_elem.find('description').text
+        category_name = product_elem.find('category').text
+        
+        accessories = []
+        for accessory in product_elem.findall('.//accessory'):
+            accessory_id = str(uuid.uuid4())
+            accessory_name = accessory.find('name').text
+            accessory_price = float(accessory.find('price').text)
+            accessories.append({
+                'id': accessory_id,
+                'name': accessory_name,
+                'price': accessory_price
+            })
+        
+        warranty_options = [option.text for option in product_elem.findall('.//warranty')]
+        retailer_discount = float(product_elem.find('retailer_discount').text)
+        manufacturer_rebate = float(product_elem.find('manufacturer_rebate').text)
+        available_items = int(product_elem.find('available_items').text)
+        
+        products_map[product_id] = {
+            'id': product_id,
+            'name': name,
+            'price': price,
+            'description': description,
+            'category': category_name,
+            'accessories': accessories,
+            'warranty_options': warranty_options,
+            'retailer_discount': retailer_discount,
+            'manufacturer_rebate': manufacturer_rebate,
+            'available_items': available_items
+        }
+
+def store_products_in_database():
+    for product_id, product_data in products_map.items():
+        category = Category.query.filter_by(name=product_data['category']).first()
+        if not category:
+            category = Category(name=product_data['category'])
+            db.session.add(category)
+            db.session.commit()
+        
+        new_product = Product(
+            id=product_id,
+            name=product_data['name'],
+            description=product_data['description'],
+            price=product_data['price'],
+            category_id=category.id,
+            accessories=json.dumps(product_data['accessories']),
+            warranty_options=json.dumps(product_data['warranty_options']),
+            retailer_discount=product_data['retailer_discount'],
+            manufacturer_rebate=product_data['manufacturer_rebate'],
+            available_items=product_data['available_items']
+        )
+        db.session.add(new_product)
+    
+    db.session.commit()
+
+def initialize_product_data(xml_file_path):
+    read_products_from_xml(xml_file_path)
+    store_products_in_database()
+
 
     # Check if the categories table is empty
     if not Category.query.first():
@@ -197,270 +296,270 @@ with app.app_context():
     
 
 # Add products to each category
-    products = [
-        # Smart Doorbells
-        Product(
-            name="Ring Video Doorbell", 
-            description="Smart doorbell with HD video and motion detection.",
-            price=199.99, 
-            images='', 
-            category_id=categories[0].id, 
-            accessories=json.dumps(sample_accessories[:2]),
-            manufacturer_rebate=random_discount_or_rebate()[0], 
-            retailer_discount=random_discount_or_rebate()[1]
-        ),
-        Product(
-            name="Nest Hello", 
-            description="Wired doorbell with HD video and person alerts.",
-            price=229.99, 
-            images='', 
-            category_id=categories[0].id, 
-            accessories=json.dumps(sample_accessories),
-            manufacturer_rebate=random_discount_or_rebate()[0], 
-            retailer_discount=random_discount_or_rebate()[1]
-        ),
-        Product(
-            name="Arlo Video Doorbell", 
-            description="Smart doorbell with wide-angle view and HDR.",
-            price=149.99, 
-            images='', 
-            category_id=categories[0].id, 
-            accessories=json.dumps(sample_accessories),
-            manufacturer_rebate=random_discount_or_rebate()[0], 
-            retailer_discount=random_discount_or_rebate()[1]
-        ),
-        Product(
-            name="SimpliSafe Doorbell", 
-            description="Easy-to-install doorbell with video and audio.",
-            price=169.99, 
-            images='', 
-            category_id=categories[0].id, 
-            accessories=json.dumps(sample_accessories[:1]),
-            manufacturer_rebate=random_discount_or_rebate()[0], 
-            retailer_discount=random_discount_or_rebate()[1]
-        ),
-        Product(
-            name="Eufy Security Doorbell", 
-            description="Battery-powered video doorbell with 2K resolution.",
-            price=179.99, 
-            images='', 
-            category_id=categories[0].id, 
-            accessories=json.dumps(sample_accessories[1:]),
-            manufacturer_rebate=random_discount_or_rebate()[0], 
-            retailer_discount=random_discount_or_rebate()[1]
-        ),
+    # products = [
+    #     # Smart Doorbells
+    #     Product(
+    #         name="Ring Video Doorbell", 
+    #         description="Smart doorbell with HD video and motion detection.",
+    #         price=199.99, 
+    #         images='', 
+    #         category_id=categories[0].id, 
+    #         accessories=json.dumps(sample_accessories[:2]),
+    #         manufacturer_rebate=random_discount_or_rebate()[0], 
+    #         retailer_discount=random_discount_or_rebate()[1]
+    #     ),
+    #     Product(
+    #         name="Nest Hello", 
+    #         description="Wired doorbell with HD video and person alerts.",
+    #         price=229.99, 
+    #         images='', 
+    #         category_id=categories[0].id, 
+    #         accessories=json.dumps(sample_accessories),
+    #         manufacturer_rebate=random_discount_or_rebate()[0], 
+    #         retailer_discount=random_discount_or_rebate()[1]
+    #     ),
+    #     Product(
+    #         name="Arlo Video Doorbell", 
+    #         description="Smart doorbell with wide-angle view and HDR.",
+    #         price=149.99, 
+    #         images='', 
+    #         category_id=categories[0].id, 
+    #         accessories=json.dumps(sample_accessories),
+    #         manufacturer_rebate=random_discount_or_rebate()[0], 
+    #         retailer_discount=random_discount_or_rebate()[1]
+    #     ),
+    #     Product(
+    #         name="SimpliSafe Doorbell", 
+    #         description="Easy-to-install doorbell with video and audio.",
+    #         price=169.99, 
+    #         images='', 
+    #         category_id=categories[0].id, 
+    #         accessories=json.dumps(sample_accessories[:1]),
+    #         manufacturer_rebate=random_discount_or_rebate()[0], 
+    #         retailer_discount=random_discount_or_rebate()[1]
+    #     ),
+    #     Product(
+    #         name="Eufy Security Doorbell", 
+    #         description="Battery-powered video doorbell with 2K resolution.",
+    #         price=179.99, 
+    #         images='', 
+    #         category_id=categories[0].id, 
+    #         accessories=json.dumps(sample_accessories[1:]),
+    #         manufacturer_rebate=random_discount_or_rebate()[0], 
+    #         retailer_discount=random_discount_or_rebate()[1]
+    #     ),
 
-        # Smart Doorlocks
-        Product(
-            name="August Smart Lock", 
-            description="Keyless entry and remote control for your door.",
-            price=229.99, 
-            images='', 
-            category_id=categories[1].id, 
-            accessories=json.dumps(sample_accessories[:2]),
-            manufacturer_rebate=random_discount_or_rebate()[0], 
-            retailer_discount=random_discount_or_rebate()[1]
-        ),
-        Product(
-            name="Yale Assure Lock", 
-            description="Touchscreen smart lock with keyless entry.",
-            price=199.99, 
-            images='', 
-            category_id=categories[1].id, 
-            accessories=json.dumps(sample_accessories),
-            manufacturer_rebate=random_discount_or_rebate()[0], 
-            retailer_discount=random_discount_or_rebate()[1]
-        ),
-        Product(
-            name="Schlage Encode", 
-            description="Smart lock with built-in WiFi.",
-            price=249.99, 
-            images='', 
-            category_id=categories[1].id, 
-            accessories=json.dumps(sample_accessories),
-            manufacturer_rebate=random_discount_or_rebate()[0], 
-            retailer_discount=random_discount_or_rebate()[1]
-        ),
-        Product(
-            name="Ultraloq U-Bolt Pro", 
-            description="Smart lock with fingerprint ID.",
-            price=159.99, 
-            images='', 
-            category_id=categories[1].id, 
-            accessories=json.dumps(sample_accessories[:1]),
-            manufacturer_rebate=random_discount_or_rebate()[0], 
-            retailer_discount=random_discount_or_rebate()[1]
-        ),
-        Product(
-            name="Kwikset SmartCode", 
-            description="Deadbolt smart lock with customizable entry codes.",
-            price=179.99, 
-            images='', 
-            category_id=categories[1].id, 
-            accessories=json.dumps(sample_accessories[1:]),
-            manufacturer_rebate=random_discount_or_rebate()[0], 
-            retailer_discount=random_discount_or_rebate()[1]
-        ),
+    #     # Smart Doorlocks
+    #     Product(
+    #         name="August Smart Lock", 
+    #         description="Keyless entry and remote control for your door.",
+    #         price=229.99, 
+    #         images='', 
+    #         category_id=categories[1].id, 
+    #         accessories=json.dumps(sample_accessories[:2]),
+    #         manufacturer_rebate=random_discount_or_rebate()[0], 
+    #         retailer_discount=random_discount_or_rebate()[1]
+    #     ),
+    #     Product(
+    #         name="Yale Assure Lock", 
+    #         description="Touchscreen smart lock with keyless entry.",
+    #         price=199.99, 
+    #         images='', 
+    #         category_id=categories[1].id, 
+    #         accessories=json.dumps(sample_accessories),
+    #         manufacturer_rebate=random_discount_or_rebate()[0], 
+    #         retailer_discount=random_discount_or_rebate()[1]
+    #     ),
+    #     Product(
+    #         name="Schlage Encode", 
+    #         description="Smart lock with built-in WiFi.",
+    #         price=249.99, 
+    #         images='', 
+    #         category_id=categories[1].id, 
+    #         accessories=json.dumps(sample_accessories),
+    #         manufacturer_rebate=random_discount_or_rebate()[0], 
+    #         retailer_discount=random_discount_or_rebate()[1]
+    #     ),
+    #     Product(
+    #         name="Ultraloq U-Bolt Pro", 
+    #         description="Smart lock with fingerprint ID.",
+    #         price=159.99, 
+    #         images='', 
+    #         category_id=categories[1].id, 
+    #         accessories=json.dumps(sample_accessories[:1]),
+    #         manufacturer_rebate=random_discount_or_rebate()[0], 
+    #         retailer_discount=random_discount_or_rebate()[1]
+    #     ),
+    #     Product(
+    #         name="Kwikset SmartCode", 
+    #         description="Deadbolt smart lock with customizable entry codes.",
+    #         price=179.99, 
+    #         images='', 
+    #         category_id=categories[1].id, 
+    #         accessories=json.dumps(sample_accessories[1:]),
+    #         manufacturer_rebate=random_discount_or_rebate()[0], 
+    #         retailer_discount=random_discount_or_rebate()[1]
+    #     ),
 
-        # Smart Speakers
-        Product(
-            name="Amazon Echo", 
-            description="Voice-controlled smart speaker with Alexa.",
-            price=99.99, 
-            images='', 
-            category_id=categories[2].id, 
-            accessories=json.dumps(sample_accessories[:2]),
-            manufacturer_rebate=random_discount_or_rebate()[0], 
-            retailer_discount=random_discount_or_rebate()[1]
-        ),
-        Product(
-            name="Google Nest Audio", 
-            description="Smart speaker with Google Assistant.",
-            price=89.99, 
-            images='', 
-            category_id=categories[2].id, 
-            accessories=json.dumps(sample_accessories),
-            manufacturer_rebate=random_discount_or_rebate()[0], 
-            retailer_discount=random_discount_or_rebate()[1]
-        ),
-        Product(
-            name="Apple HomePod Mini", 
-            description="Smart speaker with Siri integration.",
-            price=99.99, 
-            images='', 
-            category_id=categories[2].id, 
-            accessories=json.dumps(sample_accessories),
-            manufacturer_rebate=random_discount_or_rebate()[0], 
-            retailer_discount=random_discount_or_rebate()[1]
-        ),
-        Product(
-            name="Sonos One", 
-            description="Smart speaker with voice control and excellent sound.",
-            price=199.99, 
-            images='', 
-            category_id=categories[2].id, 
-            accessories=json.dumps(sample_accessories[:1]),
-            manufacturer_rebate=random_discount_or_rebate()[0], 
-            retailer_discount=random_discount_or_rebate()[1]
-        ),
-        Product(
-            name="Bose Home Speaker 500", 
-            description="Smart speaker with Alexa and Google Assistant.",
-            price=299.99, 
-            images='', 
-            category_id=categories[2].id, 
-            accessories=json.dumps(sample_accessories[1:]),
-            manufacturer_rebate=random_discount_or_rebate()[0], 
-            retailer_discount=random_discount_or_rebate()[1]
-        ),
+    #     # Smart Speakers
+    #     Product(
+    #         name="Amazon Echo", 
+    #         description="Voice-controlled smart speaker with Alexa.",
+    #         price=99.99, 
+    #         images='', 
+    #         category_id=categories[2].id, 
+    #         accessories=json.dumps(sample_accessories[:2]),
+    #         manufacturer_rebate=random_discount_or_rebate()[0], 
+    #         retailer_discount=random_discount_or_rebate()[1]
+    #     ),
+    #     Product(
+    #         name="Google Nest Audio", 
+    #         description="Smart speaker with Google Assistant.",
+    #         price=89.99, 
+    #         images='', 
+    #         category_id=categories[2].id, 
+    #         accessories=json.dumps(sample_accessories),
+    #         manufacturer_rebate=random_discount_or_rebate()[0], 
+    #         retailer_discount=random_discount_or_rebate()[1]
+    #     ),
+    #     Product(
+    #         name="Apple HomePod Mini", 
+    #         description="Smart speaker with Siri integration.",
+    #         price=99.99, 
+    #         images='', 
+    #         category_id=categories[2].id, 
+    #         accessories=json.dumps(sample_accessories),
+    #         manufacturer_rebate=random_discount_or_rebate()[0], 
+    #         retailer_discount=random_discount_or_rebate()[1]
+    #     ),
+    #     Product(
+    #         name="Sonos One", 
+    #         description="Smart speaker with voice control and excellent sound.",
+    #         price=199.99, 
+    #         images='', 
+    #         category_id=categories[2].id, 
+    #         accessories=json.dumps(sample_accessories[:1]),
+    #         manufacturer_rebate=random_discount_or_rebate()[0], 
+    #         retailer_discount=random_discount_or_rebate()[1]
+    #     ),
+    #     Product(
+    #         name="Bose Home Speaker 500", 
+    #         description="Smart speaker with Alexa and Google Assistant.",
+    #         price=299.99, 
+    #         images='', 
+    #         category_id=categories[2].id, 
+    #         accessories=json.dumps(sample_accessories[1:]),
+    #         manufacturer_rebate=random_discount_or_rebate()[0], 
+    #         retailer_discount=random_discount_or_rebate()[1]
+    #     ),
 
-        # Smart Lightings
-        Product(
-            name="Philips Hue Bulb", 
-            description="Smart light bulb with app control.",
-            price=49.99, 
-            images='', 
-            category_id=categories[3].id, 
-            accessories=json.dumps(sample_accessories[:2]),
-            manufacturer_rebate=random_discount_or_rebate()[0], 
-            retailer_discount=random_discount_or_rebate()[1]
-        ),
-        Product(
-            name="LIFX Smart Bulb", 
-            description="Color-changing smart bulb.",
-            price=59.99, 
-            images='', 
-            category_id=categories[3].id, 
-            accessories=json.dumps(sample_accessories),
-            manufacturer_rebate=random_discount_or_rebate()[0], 
-            retailer_discount=random_discount_or_rebate()[1]
-        ),
-        Product(
-            name="Nanoleaf Light Panels", 
-            description="Customizable LED light panels.",
-            price=199.99, 
-            images='', 
-            category_id=categories[3].id, 
-            accessories=json.dumps(sample_accessories),
-            manufacturer_rebate=random_discount_or_rebate()[0], 
-            retailer_discount=random_discount_or_rebate()[1]
-        ),
-        Product(
-            name="Wyze Bulb", 
-            description="Affordable smart bulb with voice control.",
-            price=29.99, 
-            images='', 
-            category_id=categories[3].id, 
-            accessories=json.dumps(sample_accessories[:1]),
-            manufacturer_rebate=random_discount_or_rebate()[0], 
-            retailer_discount=random_discount_or_rebate()[1]
-        ),
-        Product(
-            name="TP-Link Kasa Bulb", 
-            description="Smart bulb with adjustable brightness.",
-            price=29.99, 
-            images='', 
-            category_id=categories[3].id, 
-            accessories=json.dumps(sample_accessories[1:]),
-            manufacturer_rebate=random_discount_or_rebate()[0], 
-            retailer_discount=random_discount_or_rebate()[1]
-        ),
+    #     # Smart Lightings
+    #     Product(
+    #         name="Philips Hue Bulb", 
+    #         description="Smart light bulb with app control.",
+    #         price=49.99, 
+    #         images='', 
+    #         category_id=categories[3].id, 
+    #         accessories=json.dumps(sample_accessories[:2]),
+    #         manufacturer_rebate=random_discount_or_rebate()[0], 
+    #         retailer_discount=random_discount_or_rebate()[1]
+    #     ),
+    #     Product(
+    #         name="LIFX Smart Bulb", 
+    #         description="Color-changing smart bulb.",
+    #         price=59.99, 
+    #         images='', 
+    #         category_id=categories[3].id, 
+    #         accessories=json.dumps(sample_accessories),
+    #         manufacturer_rebate=random_discount_or_rebate()[0], 
+    #         retailer_discount=random_discount_or_rebate()[1]
+    #     ),
+    #     Product(
+    #         name="Nanoleaf Light Panels", 
+    #         description="Customizable LED light panels.",
+    #         price=199.99, 
+    #         images='', 
+    #         category_id=categories[3].id, 
+    #         accessories=json.dumps(sample_accessories),
+    #         manufacturer_rebate=random_discount_or_rebate()[0], 
+    #         retailer_discount=random_discount_or_rebate()[1]
+    #     ),
+    #     Product(
+    #         name="Wyze Bulb", 
+    #         description="Affordable smart bulb with voice control.",
+    #         price=29.99, 
+    #         images='', 
+    #         category_id=categories[3].id, 
+    #         accessories=json.dumps(sample_accessories[:1]),
+    #         manufacturer_rebate=random_discount_or_rebate()[0], 
+    #         retailer_discount=random_discount_or_rebate()[1]
+    #     ),
+    #     Product(
+    #         name="TP-Link Kasa Bulb", 
+    #         description="Smart bulb with adjustable brightness.",
+    #         price=29.99, 
+    #         images='', 
+    #         category_id=categories[3].id, 
+    #         accessories=json.dumps(sample_accessories[1:]),
+    #         manufacturer_rebate=random_discount_or_rebate()[0], 
+    #         retailer_discount=random_discount_or_rebate()[1]
+    #     ),
 
-        # Smart Thermostats
-        Product(
-            name="Nest Learning Thermostat", 
-            description="Smart thermostat that learns your preferences.",
-            price=249.99, 
-            images='', 
-            category_id=categories[4].id, 
-            accessories=json.dumps(sample_accessories[:2]),
-            manufacturer_rebate=random_discount_or_rebate()[0], 
-            retailer_discount=random_discount_or_rebate()[1]
-        ),
-        Product(
-            name="Ecobee SmartThermostat", 
-            description="Thermostat with voice control and remote sensors.",
-            price=219.99, 
-            images='', 
-            category_id=categories[4].id, 
-            accessories=json.dumps(sample_accessories),
-            manufacturer_rebate=random_discount_or_rebate()[0], 
-            retailer_discount=random_discount_or_rebate()[1]
-        ),
-        Product(
-            name="Honeywell T9", 
-            description="Smart thermostat with room sensors.",
-            price=199.99, 
-            images='', 
-            category_id=categories[4].id, 
-            accessories=json.dumps(sample_accessories),
-            manufacturer_rebate=random_discount_or_rebate()[0], 
-            retailer_discount=random_discount_or_rebate()[1]
-        ),
-        Product(
-            name="Emerson Sensi", 
-            description="Smart thermostat with mobile app control.",
-            price=129.99, 
-            images='', 
-            category_id=categories[4].id, 
-            accessories=json.dumps(sample_accessories[:1]),
-            manufacturer_rebate=random_discount_or_rebate()[0], 
-            retailer_discount=random_discount_or_rebate()[1]
-        ),
-        Product(
-            name="Lux Kono Smart Thermostat", 
-            description="Stylish thermostat with smart features.",
-            price=139.99, 
-            images='', 
-            category_id=categories[4].id, 
-            accessories=json.dumps(sample_accessories[1:]),
-            manufacturer_rebate=random_discount_or_rebate()[0], 
-            retailer_discount=random_discount_or_rebate()[1]
-        )
-    ]
+    #     # Smart Thermostats
+    #     Product(
+    #         name="Nest Learning Thermostat", 
+    #         description="Smart thermostat that learns your preferences.",
+    #         price=249.99, 
+    #         images='', 
+    #         category_id=categories[4].id, 
+    #         accessories=json.dumps(sample_accessories[:2]),
+    #         manufacturer_rebate=random_discount_or_rebate()[0], 
+    #         retailer_discount=random_discount_or_rebate()[1]
+    #     ),
+    #     Product(
+    #         name="Ecobee SmartThermostat", 
+    #         description="Thermostat with voice control and remote sensors.",
+    #         price=219.99, 
+    #         images='', 
+    #         category_id=categories[4].id, 
+    #         accessories=json.dumps(sample_accessories),
+    #         manufacturer_rebate=random_discount_or_rebate()[0], 
+    #         retailer_discount=random_discount_or_rebate()[1]
+    #     ),
+    #     Product(
+    #         name="Honeywell T9", 
+    #         description="Smart thermostat with room sensors.",
+    #         price=199.99, 
+    #         images='', 
+    #         category_id=categories[4].id, 
+    #         accessories=json.dumps(sample_accessories),
+    #         manufacturer_rebate=random_discount_or_rebate()[0], 
+    #         retailer_discount=random_discount_or_rebate()[1]
+    #     ),
+    #     Product(
+    #         name="Emerson Sensi", 
+    #         description="Smart thermostat with mobile app control.",
+    #         price=129.99, 
+    #         images='', 
+    #         category_id=categories[4].id, 
+    #         accessories=json.dumps(sample_accessories[:1]),
+    #         manufacturer_rebate=random_discount_or_rebate()[0], 
+    #         retailer_discount=random_discount_or_rebate()[1]
+    #     ),
+    #     Product(
+    #         name="Lux Kono Smart Thermostat", 
+    #         description="Stylish thermostat with smart features.",
+    #         price=139.99, 
+    #         images='', 
+    #         category_id=categories[4].id, 
+    #         accessories=json.dumps(sample_accessories[1:]),
+    #         manufacturer_rebate=random_discount_or_rebate()[0], 
+    #         retailer_discount=random_discount_or_rebate()[1]
+    #     )
+    # ]
 
-    db.session.add_all(products)
-    db.session.commit()
+    # db.session.add_all(products)
+    # db.session.commit()
     create_sample_data()
     if not User.query.first():
         sample_users = [
@@ -506,7 +605,10 @@ def get_products():
             'category_name': product.category.name,
             'accessories': json.loads(product.accessories) if product.accessories else [],
             'manufacturer_rebate': product.manufacturer_rebate,
-            'retailer_discount': product.retailer_discount
+            'retailer_discount': product.retailer_discount,
+            'available_items': product.available_items
+            
+            
             
         }
         for product in products
@@ -527,7 +629,9 @@ def get_product(product_id):
             'accessories': json.loads(product.accessories) if product.accessories else [],
             'warranty_options': ['No Warranty', '1 Year', '2 Years'],
             'manufacturer_rebate': product.manufacturer_rebate,
-            'retailer_discount': product.retailer_discount
+            'retailer_discount': product.retailer_discount,
+            'available_items': product.available_items
+            
         }
         return jsonify(product_data), 200
     else:
@@ -669,8 +773,11 @@ def get_store_locations():
 @app.route('/api/place-order', methods=['POST'])
 def place_order():
     data = request.json
-    print("Received order data:", data)  # Debug print
+    print("Received order data:", data)
     try:
+        # Start a transaction
+        db.session.begin()
+
         new_order = Order(
             user_name=data['name'],
             street=data['street'],
@@ -686,17 +793,19 @@ def place_order():
             order_items=json.dumps(data['cartItems'])
         )
         db.session.add(new_order)
+
+        # Update product inventory and sales
+        for item in data['cartItems']:
+            product = Product.query.get(item['product_id'])
+            if product:
+                if product.available_items < item['quantity']:
+                    db.session.rollback()
+                    return jsonify({'error': f'Not enough inventory for {product.name}'}), 400
+                product.available_items -= item['quantity']
+                
+
         db.session.commit()
         return jsonify({'message': 'Order placed successfully', 'order_id': new_order.id}), 201
-    except Exception as e:
-        print(f"Error placing order: {str(e)}")  # Debug print
-        db.session.rollback()
-        return jsonify({'error': str(e)}), 500@app.route('/api/cart/clear', methods=['DELETE'])
-def clear_cart():
-    try:
-        db.session.query(CartItem).delete()
-        db.session.commit()
-        return jsonify({'message': 'Cart cleared successfully'}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 @app.route('/api/cart/clear', methods=['DELETE'])
@@ -707,31 +816,121 @@ def clear_cart():
         return jsonify({'message': 'Cart cleared successfully'}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+# @app.route('/api/cart/clear', methods=['DELETE'])
+# def clear_cart():
+#     try:
+#         db.session.query(CartItem).delete()
+#         db.session.commit()
+#         return jsonify({'message': 'Cart cleared successfully'}), 200
+#     except Exception as e:
+#         return jsonify({'error': str(e)}), 500
 
 
-# Endpoint to add a new product
+def update_product_catalog_xml(product_data, operation='add'):
+    tree = ET.parse('ProductCatalog.xml')
+    root = tree.getroot()
+
+    if operation == 'add':
+        product_elem = ET.SubElement(root, 'product')
+        ET.SubElement(product_elem, 'id').text = product_data['id']
+        ET.SubElement(product_elem, 'name').text = product_data['name']
+        ET.SubElement(product_elem, 'description').text = product_data['description']
+        ET.SubElement(product_elem, 'price').text = str(product_data['price'])
+        ET.SubElement(product_elem, 'category').text = product_data['category']
+
+        accessories_elem = ET.SubElement(product_elem, 'accessories')
+        for accessory in product_data.get('accessories', []):
+            accessory_elem = ET.SubElement(accessories_elem, 'accessory')
+            ET.SubElement(accessory_elem, 'name').text = accessory['name']
+            ET.SubElement(accessory_elem, 'price').text = str(accessory['price'])
+
+        ET.SubElement(product_elem, 'warranty_options').text = ','.join(product_data.get('warranty_options', []))
+        ET.SubElement(product_elem, 'retailer_discount').text = str(product_data.get('retailer_discount', 0.0))
+        ET.SubElement(product_elem, 'manufacturer_rebate').text = str(product_data.get('manufacturer_rebate', 0.0))
+        ET.SubElement(product_elem, 'available_items').text = str(product_data.get('available_items', 0.0))
+        
+
+    elif operation == 'update':
+        for product in root.findall('product'):
+            if product.find('id').text == product_data['id']:
+                product.find('name').text = product_data['name']
+                product.find('description').text = product_data['description']
+                product.find('price').text = str(product_data['price'])
+                product.find('category').text = product_data['category']
+                
+                accessories_elem = product.find('accessories')
+                accessories_elem.clear()
+                for accessory in product_data.get('accessories', []):
+                    accessory_elem = ET.SubElement(accessories_elem, 'accessory')
+                    ET.SubElement(accessory_elem, 'name').text = accessory['name']
+                    ET.SubElement(accessory_elem, 'price').text = str(accessory['price'])
+
+                product.find('warranty_options').text = ','.join(product_data.get('warranty_options', []))
+                product.find('retailer_discount').text = str(product_data.get('retailer_discount', 0.0))
+                product.find('manufacturer_rebate').text = str(product_data.get('manufacturer_rebate', 0.0))
+                product.find('available_items').text = str(product_data.get('available_items', 0.0))
+                
+                break
+
+    elif operation == 'delete':
+        for product in root.findall('product'):
+            if product.find('id').text == product_data['id']:
+                root.remove(product)
+                break
+
+    tree.write('ProductCatalog.xml')
+
 @app.route('/api/products/add', methods=['POST'])
 def add_product():
     data = request.json
     try:
+        category = Category.query.filter_by(name=data['category']).first()
+        if not category:
+            category = Category(name=data['category'])
+            db.session.add(category)
+            db.session.commit()
+
         new_product = Product(
             id=str(uuid.uuid4()),
             name=data['name'],
             description=data['description'],
             price=data['price'],
-            category_id=data['category'],
-            accessories=json.dumps(data['accessories']),
+            category_id=category.id,
+            accessories=json.dumps(data.get('accessories', [])),
+            warranty_options=json.dumps(data.get('warranty_options', [])),
+            retailer_discount=data.get('retailer_discount', 0.0),
             manufacturer_rebate=data.get('manufacturer_rebate', 0.0),
-            retailer_discount=data.get('retailer_discount', 0.0)
+            available_items=data.get('available_items', 0.0)
         )
         db.session.add(new_product)
         db.session.commit()
-        return jsonify({'message': 'Product added successfully', 'product': new_product.id}), 201
+
+        # Update the in-memory map
+        products_map[new_product.id] = data
+
+        # Update the XML file
+        product_data = {
+            'id': new_product.id,
+            'name': new_product.name,
+            'description': new_product.description,
+            'price': new_product.price,
+            'category': category.name,
+            'accessories': json.loads(new_product.accessories),
+            'warranty_options': json.loads(new_product.warranty_options),
+            'retailer_discount': new_product.retailer_discount,
+            'manufacturer_rebate': new_product.manufacturer_rebate,
+            'available_items': new_product.available_items
+        }
+        update_product_catalog_xml(product_data, 'add')
+
+        return jsonify({'message': 'Product added successfully', 'product_id': new_product.id}), 201
+    except KeyError as e:
+        print(f"Missing required field: {e}")
+        return jsonify({'error': f'Missing required field: {e}'}), 400
     except Exception as e:
         print(f"Error adding product: {e}")
         return jsonify({'error': str(e)}), 500
 
-# Endpoint to update an existing product
 @app.route('/api/products/update/<string:product_id>', methods=['PUT'])
 def update_product(product_id):
     data = request.json
@@ -740,21 +939,47 @@ def update_product(product_id):
         if not product:
             return jsonify({'error': 'Product not found'}), 404
 
+        category = Category.query.filter_by(name=data['category']).first()
+        if not category:
+            category = Category(name=data['category'])
+            db.session.add(category)
+            db.session.commit()
+
         product.name = data['name']
         product.description = data['description']
         product.price = data['price']
-        product.category_id = data['category']
-        product.accessories = json.dumps(data['accessories'])
+        product.category_id = category.id
+        product.accessories = json.dumps(data.get('accessories', []))
+        product.warranty_options = json.dumps(data.get('warranty_options', []))
+        product.retailer_discount = data.get('retailer_discount', 0.0)
         product.manufacturer_rebate = data.get('manufacturer_rebate', 0.0)
-        product.retailer_discount = data.get('retailer_discount', 0.0) 
-        
+        product.available_items = data.get('available_items', 0.0)
+
         db.session.commit()
+
+        # Update the in-memory map
+        products_map[product_id] = data
+
+        # Update the XML file
+        product_data = {
+            'id': product.id,
+            'name': product.name,
+            'description': product.description,
+            'price': product.price,
+            'category': category.name,
+            'accessories': json.loads(product.accessories),
+            'warranty_options': json.loads(product.warranty_options),
+            'retailer_discount': product.retailer_discount,
+            'manufacturer_rebate': product.manufacturer_rebate,
+            'available_items': product.available_items
+        }
+        update_product_catalog_xml(product_data, 'update')
+
         return jsonify({'message': 'Product updated successfully'}), 200
     except Exception as e:
         print(f"Error updating product: {e}")
         return jsonify({'error': str(e)}), 500
 
-# Endpoint to delete a product
 @app.route('/api/products/delete/<string:product_id>', methods=['DELETE'])
 def delete_product(product_id):
     try:
@@ -764,10 +989,29 @@ def delete_product(product_id):
 
         db.session.delete(product)
         db.session.commit()
+
+        # Remove from the in-memory map
+        if product_id in products_map:
+            del products_map[product_id]
+
+        # Update the XML file
+        update_product_catalog_xml({'id': product_id}, 'delete')
+
         return jsonify({'message': 'Product deleted successfully'}), 200
     except Exception as e:
         print(f"Error deleting product: {e}")
         return jsonify({'error': str(e)}), 500
+    
+
+@app.route('/api/products/search', methods=['GET'])
+def search_products():
+    query = request.args.get('query', '')
+    if query:
+        products = Product.query.filter(Product.name.ilike(f'%{query}%')).limit(10).all()  # Limit results to 10
+        return jsonify([product.to_dict() for product in products])
+    return jsonify([]), 400
+
+
 
 @app.route('/api/register', methods=['POST'])
 def register_user():
@@ -1091,4 +1335,7 @@ def get_top_sold_products():
 
     
 if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()
+        initialize_product_data('ProductCatalog.xml')
     app.run(debug=True, port=5001, threaded=True)

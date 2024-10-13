@@ -1,0 +1,587 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<catalog>
+  <product>
+    <id>1</id>
+    <name>Ring Video Doorbell</name>
+    <description>Smart doorbell with HD video and motion detection.</description>
+    <price>199.99</price>
+    <category>1</category>
+    <accessories>
+      <accessory>
+        <name>Battery Pack</name>
+        <price>19.99</price>
+      </accessory>
+      <accessory>
+        <name>Wall Mount</name>
+        <price>14.99</price>
+      </accessory>
+    </accessories>
+    <retailer_discount>0.00</retailer_discount>
+    <manufacturer_rebate>15.00</manufacturer_rebate>
+    <warranty_options>No Warranty, 1 Year, 2 Years</warranty_options>
+    <available_items>50</available_items>
+  </product>
+
+  <product>
+    <id>2</id>
+    <name>Nest Hello</name>
+    <description>Wired doorbell with HD video and person alerts.</description>
+    <price>229.99</price>
+    <category>1</category>
+    <accessories>
+      <accessory>
+        <name>Wall Mount</name>
+        <price>14.99</price>
+      </accessory>
+      <accessory>
+        <name>Smart Plug</name>
+        <price>24.99</price>
+      </accessory>
+      <accessory>
+        <name>Extension Cable</name>
+        <price>9.99</price>
+      </accessory>
+    </accessories>
+    <retailer_discount>25.50</retailer_discount>
+    <manufacturer_rebate>0.00</manufacturer_rebate>
+    <warranty_options>No Warranty, 1 Year, 2 Years, 3 Years</warranty_options>
+    <available_items>75</available_items>
+  </product>
+
+  <product>
+    <id>3</id>
+    <name>Arlo Video Doorbell</name>
+    <description>Smart doorbell with wide-angle view and HDR.</description>
+    <price>149.99</price>
+    <category>1</category>
+    <accessories>
+      <accessory>
+        <name>Battery Pack</name>
+        <price>19.99</price>
+      </accessory>
+    </accessories>
+    <retailer_discount>12.75</retailer_discount>
+    <manufacturer_rebate>7.50</manufacturer_rebate>
+    <warranty_options>No Warranty, 1 Year, 2 Years</warranty_options>
+    <available_items>60</available_items>
+  </product>
+
+  <product>
+    <id>4</id>
+    <name>SimpliSafe Doorbell</name>
+    <description>Easy-to-install doorbell with video and audio.</description>
+    <price>169.99</price>
+    <category>1</category>
+    <accessories>
+      <accessory>
+        <name>Battery Pack</name>
+        <price>19.99</price>
+      </accessory>
+      <accessory>
+        <name>Weather Shield</name>
+        <price>12.99</price>
+      </accessory>
+    </accessories>
+    <retailer_discount>0.00</retailer_discount>
+    <manufacturer_rebate>0.00</manufacturer_rebate>
+    <warranty_options>No Warranty, 1 Year, 3 Years</warranty_options>
+    <available_items>40</available_items>
+  </product>
+
+  <product>
+    <id>5</id>
+    <name>Eufy Security Doorbell</name>
+    <description>Battery-powered video doorbell with 2K resolution.</description>
+    <price>179.99</price>
+    <category>1</category>
+    <accessories>
+      <accessory>
+        <name>Wall Mount</name>
+        <price>14.99</price>
+      </accessory>
+      <accessory>
+        <name>Smart Plug</name>
+        <price>24.99</price>
+      </accessory>
+    </accessories>
+    <retailer_discount>20.25</retailer_discount>
+    <manufacturer_rebate>15.00</manufacturer_rebate>
+    <warranty_options>No Warranty, 1 Year, 2 Years, 5 Years</warranty_options>
+    <available_items>55</available_items>
+  </product>
+
+  <product>
+    <id>6</id>
+    <name>August Smart Lock</name>
+    <description>Keyless entry and remote control for your door.</description>
+    <price>229.99</price>
+    <category>2</category>
+    <accessories>
+      <accessory>
+        <name>Battery Pack</name>
+        <price>19.99</price>
+      </accessory>
+      <accessory>
+        <name>Wall Mount</name>
+        <price>14.99</price>
+      </accessory>
+      <accessory>
+        <name>Smart Keypad</name>
+        <price>59.99</price>
+      </accessory>
+    </accessories>
+    <retailer_discount>30.00</retailer_discount>
+    <manufacturer_rebate>0.00</manufacturer_rebate>
+    <warranty_options>No Warranty, 1 Year, 2 Years, 3 Years</warranty_options>
+    <available_items>80</available_items>
+  </product>
+
+  <product>
+    <id>7</id>
+    <name>Yale Assure Lock</name>
+    <description>Touchscreen smart lock with keyless entry.</description>
+    <price>199.99</price>
+    <category>2</category>
+    <accessories>
+      <accessory>
+        <name>Battery Pack</name>
+        <price>19.99</price>
+      </accessory>
+      <accessory>
+        <name>Smart Plug</name>
+        <price>24.99</price>
+      </accessory>
+    </accessories>
+    <retailer_discount>18.50</retailer_discount>
+    <manufacturer_rebate>12.00</manufacturer_rebate>
+    <warranty_options>No Warranty, 1 Year, 2 Years</warranty_options>
+    <available_items>65</available_items>
+  </product>
+
+  <product>
+    <id>8</id>
+    <name>Schlage Encode</name>
+    <description>Smart lock with built-in WiFi.</description>
+    <price>249.99</price>
+    <category>2</category>
+    <accessories>
+      <accessory>
+        <name>Battery Pack</name>
+        <price>19.99</price>
+      </accessory>
+    </accessories>
+    <retailer_discount>0.00</retailer_discount>
+    <manufacturer_rebate>25.00</manufacturer_rebate>
+    <warranty_options>No Warranty, 1 Year, 2 Years, 5 Years</warranty_options>
+    <available_items>70</available_items>
+  </product>
+
+  <product>
+    <id>9</id>
+    <name>Ultraloq U-Bolt Pro</name>
+    <description>Smart lock with fingerprint ID.</description>
+    <price>159.99</price>
+    <category>2</category>
+    <accessories>
+      <accessory>
+        <name>Battery Pack</name>
+        <price>19.99</price>
+      </accessory>
+      <accessory>
+        <name>Bluetooth Adapter</name>
+        <price>29.99</price>
+      </accessory>
+    </accessories>
+    <retailer_discount>17.25</retailer_discount>
+    <manufacturer_rebate>8.00</manufacturer_rebate>
+    <warranty_options>No Warranty, 1 Year, 3 Years</warranty_options>
+    <available_items>45</available_items>
+  </product>
+
+  <product>
+    <id>10</id>
+    <name>Kwikset SmartCode</name>
+    <description>Deadbolt smart lock with customizable entry codes.</description>
+    <price>179.99</price>
+    <category>2</category>
+    <accessories>
+      <accessory>
+        <name>Wall Mount</name>
+        <price>14.99</price>
+      </accessory>
+      <accessory>
+        <name>Smart Plug</name>
+        <price>24.99</price>
+      </accessory>
+      <accessory>
+        <name>Key Fob</name>
+        <price>19.99</price>
+      </accessory>
+    </accessories>
+    <retailer_discount>0.00</retailer_discount>
+    <manufacturer_rebate>15.00</manufacturer_rebate>
+    <warranty_options>No Warranty, 1 Year, 2 Years</warranty_options>
+    <available_items>55</available_items>
+  </product>
+
+  <product>
+    <id>11</id>
+    <name>Amazon Echo</name>
+    <description>Voice-controlled smart speaker with Alexa.</description>
+    <price>99.99</price>
+    <category>3</category>
+    <accessories>
+      <accessory>
+        <name>Wall Mount</name>
+        <price>14.99</price>
+      </accessory>
+    </accessories>
+    <retailer_discount>12.50</retailer_discount>
+    <manufacturer_rebate>0.00</manufacturer_rebate>
+    <warranty_options>No Warranty, 1 Year, 2 Years</warranty_options>
+    <available_items>100</available_items>
+  </product>
+
+  <product>
+    <id>12</id>
+    <name>Google Nest Audio</name>
+    <description>Smart speaker with Google Assistant.</description>
+    <price>89.99</price>
+    <category>3</category>
+    <accessories>
+      <accessory>
+        <name>Wall Mount</name>
+        <price>14.99</price>
+      </accessory>
+      <accessory>
+        <name>Smart Plug</name>
+        <price>24.99</price>
+      </accessory>
+    </accessories>
+    <retailer_discount>10.00</retailer_discount>
+    <manufacturer_rebate>5.00</manufacturer_rebate>
+    <warranty_options>No Warranty, 1 Year, 2 Years</warranty_options>
+    <available_items>90</available_items>
+  </product>
+
+  <product>
+    <id>13</id>
+    <name>Apple HomePod Mini</name>
+    <description>Smart speaker with Siri integration.</description>
+    <price>99.99</price>
+    <category>3</category>
+    <accessories>
+      <accessory>
+        <name>Wall Mount</name>
+        <price>14.99</price>
+      </accessory>
+      <accessory>
+        <name>Smart Plug</name>
+        <price>24.99</price>
+      </accessory>
+      <accessory>
+        <name>Protective Case</name>
+        <price>19.99</price>
+      </accessory>
+    </accessories>
+    <retailer_discount>0.00</retailer_discount>
+    <manufacturer_rebate>7.50</manufacturer_rebate>
+    <warranty_options>No Warranty, 1 Year, 2 Years</warranty_options>
+    <available_items>85</available_items>
+  </product>
+
+  <product>
+    <id>14</id>
+    <name>Sonos One</name>
+    <description>Smart speaker with voice control and excellent sound.</description>
+    <price>199.99</price>
+    <category>3</category>
+    <accessories>
+      <accessory>
+        <name>Wall Mount</name>
+        <price>14.99</price>
+      </accessory>
+    </accessories>
+    <retailer_discount>22.50</retailer_discount>
+    <manufacturer_rebate>17.00</manufacturer_rebate>
+    <warranty_options>No Warranty, 1 Year, 2 Years, 3 Years</warranty_options>
+    <available_items>70</available_items>
+  </product>
+
+  <product>
+    <id>15</id>
+    <name>Bose Home Speaker 500</name>
+    <description>Smart speaker with Alexa and Google Assistant.</description>
+    <price>299.99</price>
+    <category>3</category>
+    <accessories>
+      <accessory>
+        <name>Wall Mount</name>
+        <price>14.99</price>
+      </accessory>
+      <accessory>
+        <name>Smart Plug</name>
+        <price>24.99</price>
+      </accessory>
+    </accessories>
+    <retailer_discount>35.00</retailer_discount>
+    <manufacturer_rebate>0.00</manufacturer_rebate>
+    <warranty_options>No Warranty, 1 Year, 2 Years, 5 Years</warranty_options>
+    <available_items>60</available_items>
+  </product>
+
+  <product>
+    <id>16</id>
+    <name>Philips Hue Bulb</name>
+    <description>Smart light bulb with app control.</description>
+    <price>49.99</price>
+    <category>4</category>
+    <accessories>
+      <accessory>
+        <name>Smart Plug</name>
+        <price>24.99</price>
+      </accessory>
+      <accessory>
+        <name>Hue Bridge</name>
+        <price>59.99</price>
+      </accessory>
+    </accessories>
+    <retailer_discount>6.50</retailer_discount>
+    <manufacturer_rebate>0.00</manufacturer_rebate>
+    <warranty_options>No Warranty, 1 Year, 2 Years</warranty_options>
+    <available_items>150</available_items>
+  </product>
+
+  <product>
+    <id>17</id>
+    <name>LIFX Smart Bulb</name>
+    <description>Color-changing smart bulb.</description>
+    <price>59.99</price>
+    <category>4</category>
+    <accessories>
+      <accessory>
+        <name>Smart Plug</name>
+        <price>24.99</price>
+      </accessory>
+    </accessories>
+    <retailer_discount>0.00</retailer_discount>
+    <manufacturer_rebate>5.00</manufacturer_rebate>
+    <warranty_options>No Warranty, 1 Year, 2 Years</warranty_options>
+    <available_items>120</available_items>
+  </product>
+
+  <product>
+    <id>18</id>
+    <name>Nanoleaf Light Panels</name>
+    <description>Customizable LED light panels.</description>
+    <price>199.99</price>
+    <category>4</category>
+    <accessories>
+      <accessory>
+        <name>Wall Mount</name>
+        <price>14.99</price>
+      </accessory>
+      <accessory>
+        <name>Smart Plug</name>
+        <price>24.99</price>
+      </accessory>
+      <accessory>
+        <name>Extension Kit</name>
+        <price>59.99</price>
+      </accessory>
+    </accessories>
+    <retailer_discount>25.00</retailer_discount>
+    <manufacturer_rebate>10.00</manufacturer_rebate>
+    <warranty_options>No Warranty, 1 Year, 2 Years, 3 Years</warranty_options>
+    <available_items>80</available_items>
+  </product>
+  <product>
+    <id>19</id>
+    <name>Wyze Bulb</name>
+    <description>Affordable smart bulb with voice control.</description>
+    <price>29.99</price>
+    <category>4</category>
+    <accessories>
+      <accessory>
+        <name>Smart Plug</name>
+        <price>24.99</price>
+      </accessory>
+    </accessories>
+    <retailer_discount>0.00</retailer_discount>
+    <manufacturer_rebate>0.00</manufacturer_rebate>
+    <warranty_options>No Warranty, 1 Year</warranty_options>
+    <available_items>200</available_items>
+  </product>
+
+  <product>
+    <id>20</id>
+    <name>TP-Link Kasa Bulb</name>
+    <description>Smart bulb with adjustable brightness.</description>
+    <price>29.99</price>
+    <category>4</category>
+    <accessories>
+      <accessory>
+        <name>Smart Plug</name>
+        <price>24.99</price>
+      </accessory>
+      <accessory>
+        <name>Kasa Smart Hub</name>
+        <price>39.99</price>
+      </accessory>
+    </accessories>
+    <retailer_discount>4.50</retailer_discount>
+    <manufacturer_rebate>0.00</manufacturer_rebate>
+    <warranty_options>No Warranty, 1 Year, 2 Years</warranty_options>
+    <available_items>180</available_items>
+  </product>
+
+  <product>
+    <id>21</id>
+    <name>Nest Learning Thermostat</name>
+    <description>Smart thermostat that learns your preferences.</description>
+    <price>249.99</price>
+    <category>5</category>
+    <accessories>
+      <accessory>
+        <name>Wall Plate</name>
+        <price>14.99</price>
+      </accessory>
+      <accessory>
+        <name>Temperature Sensor</name>
+        <price>39.99</price>
+      </accessory>
+      <accessory>
+        <name>Trim Kit</name>
+        <price>14.99</price>
+      </accessory>
+    </accessories>
+    <retailer_discount>30.00</retailer_discount>
+    <manufacturer_rebate>15.00</manufacturer_rebate>
+    <warranty_options>No Warranty, 1 Year, 2 Years, 5 Years</warranty_options>
+    <available_items>75</available_items>
+  </product>
+
+  <product>
+    <id>22</id>
+    <name>Ecobee SmartThermostat</name>
+    <description>Thermostat with voice control and remote sensors.</description>
+    <price>219.99</price>
+    <category>5</category>
+    <accessories>
+      <accessory>
+        <name>Smart Sensor</name>
+        <price>39.99</price>
+      </accessory>
+      <accessory>
+        <name>Wall Plate</name>
+        <price>14.99</price>
+      </accessory>
+    </accessories>
+    <retailer_discount>0.00</retailer_discount>
+    <manufacturer_rebate>20.00</manufacturer_rebate>
+    <warranty_options>No Warranty, 1 Year, 2 Years, 3 Years</warranty_options>
+    <available_items>90</available_items>
+  </product>
+
+  <product>
+    <id>23</id>
+    <name>Honeywell T9</name>
+    <description>Smart thermostat with room sensors.</description>
+    <price>199.99</price>
+    <category>5</category>
+    <accessories>
+      <accessory>
+        <name>Smart Room Sensor</name>
+        <price>39.99</price>
+      </accessory>
+    </accessories>
+    <retailer_discount>22.50</retailer_discount>
+    <manufacturer_rebate>0.00</manufacturer_rebate>
+    <warranty_options>No Warranty, 1 Year, 2 Years</warranty_options>
+    <available_items>85</available_items>
+  </product>
+
+  <product>
+    <id>24</id>
+    <name>Emerson Sensi</name>
+    <description>Smart thermostat with mobile app control.</description>
+    <price>129.99</price>
+    <category>5</category>
+    <accessories>
+      <accessory>
+        <name>Wall Plate</name>
+        <price>14.99</price>
+      </accessory>
+      <accessory>
+        <name>C-Wire Adapter</name>
+        <price>24.99</price>
+      </accessory>
+    </accessories>
+    <retailer_discount>15.00</retailer_discount>
+    <manufacturer_rebate>10.00</manufacturer_rebate>
+    <warranty_options>No Warranty, 1 Year, 2 Years</warranty_options>
+    <available_items>100</available_items>
+  </product>
+
+  <product>
+    <id>25</id>
+    <name>Lux Kono Smart Thermostat</name>
+    <description>Stylish thermostat with smart features.</description>
+    <price>139.99</price>
+    <category>5</category>
+    <accessories>
+      <accessory>
+        <name>Wall Plate</name>
+        <price>14.99</price>
+      </accessory>
+      <accessory>
+        <name>Interchangeable Cover</name>
+        <price>19.99</price>
+      </accessory>
+      <accessory>
+        <name>C-Wire Adapter</name>
+        <price>24.99</price>
+      </accessory>
+    </accessories>
+    <retailer_discount>0.00</retailer_discount>
+    <manufacturer_rebate>0.00</manufacturer_rebate>
+    <warranty_options>No Warranty, 1 Year, 2 Years</warranty_options>
+    <available_items>95</available_items>
+  </product>
+
+  <product>
+    <id>4cfd3e88-8263-4f29-977e-998be2f6ef3e</id>
+    <name>Velnor</name>
+    <description>123</description>
+    <price>123.0</price>
+    <category>1</category>
+    <accessories>
+      <accessory>
+        <name>ops</name>
+        <price>10</price>
+      </accessory>
+    </accessories>
+    <warranty_options />
+    <retailer_discount>12.0</retailer_discount>
+    <manufacturer_rebate>0.0</manufacturer_rebate>
+    <available_items>50</available_items>
+  </product>
+
+  <product>
+    <id>e2517694-8992-487a-862f-b148f8e5e715</id>
+    <name>amazon echo</name>
+    <description>amazon echo old one</description>
+    <price>110.0</price>
+    <category>3</category>
+    <accessories>
+      <accessory>
+        <name>battery</name>
+        <price>12</price>
+      </accessory>
+    </accessories>
+    <warranty_options />
+    <retailer_discount>2.0</retailer_discount>
+    <manufacturer_rebate>0.0</manufacturer_rebate>
+    <available_items>75</available_items>
+  </product>
+</catalog>

@@ -9,6 +9,7 @@ function ProductDetails() {
   const [warranty, setWarranty] = useState('No Warranty');
   const [loading, setLoading] = useState(true);
   const { addToCart } = useContext(CartContext); // Ensure this line is present
+  const [quantity, setQuantity] = useState(1);
 
   useEffect(() => {
     fetch(`http://127.0.0.1:5001/api/products/${productId}`)
@@ -51,6 +52,10 @@ function ProductDetails() {
   };
 
   const handleAddToCart = () => {
+    if (quantity > product.available_items) {
+      alert('Not enough items in stock');
+      return;
+    }
     const selectedAccessoriesData = selectedAccessories.map(id => {
       const accessory = product.accessories.find(acc => acc.id === id);
       return {
@@ -74,7 +79,7 @@ function ProductDetails() {
       price: product.price,
       accessories: selectedAccessoriesData,
       warranty,
-      quantity: 1,
+      quantity: quantity,
       total_price: totalPrice,
     };
 
@@ -82,6 +87,9 @@ function ProductDetails() {
 
     // Use the addToCart function from context here
     addToCart(cartItem);
+
+    // Show success message
+    alert('Product added to cart successfully!');
 
     // fetch('http://127.0.0.1:5001/api/cart/add', {
     //   method: 'POST',
@@ -172,12 +180,28 @@ function ProductDetails() {
       )}
       {/* Total Price */}
       <p className="mt-4 text-lg font-semibold">Total Price: ${calculateTotalPrice().toFixed(2)}</p>
+      <p className="mt-4">Available: {product.available_items}</p>
+      <div className="mt-4">
+        <label htmlFor="quantity" className="mr-2">Quantity:</label>
+        <input
+          type="number"
+          id="quantity"
+          value={quantity}
+          onChange={(e) => setQuantity(Math.min(Math.max(1, parseInt(e.target.value) || 1), product.available_items))}
+          min="1"
+          max={product.available_items}
+          className="w-16 p-1 border rounded"
+        />
+      </div>
 
       <button
-        onClick={handleAddToCart}
-        className="mt-6 px-4 py-2 bg-blue-500 text-white rounded-md shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-      >
-        Add to Cart
+                onClick={handleAddToCart}
+                disabled={product.available_items === 0}
+                className={`mt-6 px-4 py-2 text-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  product.available_items === 0 ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'
+                }`}
+              >
+                {product.available_items === 0 ? 'Out of Stock' : 'Add to Cart'}
       </button>
     </div>
   );
