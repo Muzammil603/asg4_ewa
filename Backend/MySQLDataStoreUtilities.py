@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import text
+from sqlalchemy import text, func
 from pymongo import MongoClient
 from flask_cors import CORS
 from datetime import datetime, timedelta
@@ -148,28 +148,52 @@ def create_sample_data():
     db.session.commit()
 
     # Create sample orders
-    users = ["John Doe", "Jane Smith", "Bob Johnson", "Alice Brown", "Charlie Davis"]
+    users = [
+    "John Doe", "Jane Smith", "Bob Johnson", "Alice Brown", "Charlie Davis",
+    "David Wilson", "Ella Thompson", "Frank Garcia", "Grace Lee", "Hank Martinez",
+    "Isabella Moore", "Jack White", "Karen King", "Leo Scott", "Megan Adams",
+    "Nancy Baker", "Oscar Carter", "Paula Evans", "Quincy Foster", "Rachel Green"
+    ]
+
+    # Cities and states to choose from
+    
+    locations = [
+    {"city": "Chicago", "state": "IL", "zip_code": "60601"},
+    {"city": "New York", "state": "NY", "zip_code": "10001"},
+    {"city": "Los Angeles", "state": "CA", "zip_code": "90001"},
+    {"city": "Houston", "state": "TX", "zip_code": "77001"},
+    {"city": "Phoenix", "state": "AZ", "zip_code": "85001"},
+    {"city": "Philadelphia", "state": "PA", "zip_code": "19101"},
+    {"city": "San Antonio", "state": "TX", "zip_code": "78201"},
+    {"city": "San Diego", "state": "CA", "zip_code": "92101"},
+    {"city": "Dallas", "state": "TX", "zip_code": "75201"},
+    {"city": "Austin", "state": "TX", "zip_code": "73301"},
+]
     products = Product.query.all()
 
-    for _ in range(20):
+    credit_card_number = ''.join([str(random.randint(0, 9)) for _ in range(16)])
+    # random_base_date = datetime.now().date() + timedelta(days=random.randint(-15, 15))
+
+    for _ in range(100):
         user = random.choice(users)
         order_items = random.sample(products, random.randint(1, 5))
         total_amount = sum(product.price for product in order_items)
         delivery_option = random.choice(["delivery", "pickup"])
         pickup_location = random.choice(store_locations).street if delivery_option == "pickup" else None
-
+        random_base_date = datetime.now().date() + timedelta(days=random.randint(-15, 0))
         order = Order(
             user_name=user,
             street=f"{random.randint(100, 999)} Sample St",
-            city="Chicago",
-            state="IL",
-            zip_code=f"606{random.randint(10, 99)}",
-            credit_card=f"**** **** **** {random.randint(1000, 9999)}",
+            city=random.choice(locations)["city"],
+            state=random.choice(locations)["state"],
+            zip_code=random.choice(locations)["zip_code"],
+            credit_card=credit_card_number,
             delivery_option=delivery_option,
             pickup_location=pickup_location,
             total_amount=total_amount,
             confirmation_number=f"ORD-{random.randint(100000, 999999)}",
-            delivery_date=datetime.now().date() + timedelta(days=random.randint(1, 14)),
+            order_date=random_base_date,
+            delivery_date = random_base_date + timedelta(days=14),
             order_items=json.dumps([{"id": item.id, "name": item.name, "price": item.price} for item in order_items])
         )
         db.session.add(order)
@@ -1332,7 +1356,82 @@ def get_top_sold_products():
     print(response)
     return jsonify(response)
 
+@app.route('/api/sales', methods=['GET'])
+def get_sales_data():
+    try:
+        # Query to get product sales data
+        sales_data = db.session.query(
+            Product.id,
+            Product.name,
+            Product.price,
+            func.sum(func.JSON_LENGTH(Order.order_items)).label('sold_items'),
+            func.sum(Product.price * func.JSON_LENGTH(Order.order_items)).label('total_sales')
+        ).join(
+            Order,
+            text("JSON_CONTAINS(Order.order_items, CONCAT('{\"id\":\"', Product.id, '\"}'), '$')")
+        ).group_by(
+            Product.id
+        ).all()
 
+        # Convert the result to a list of dictionaries
+        result = [
+            {
+                'id': item.id,
+                'name': item.name,
+                'price': float(item.price),
+                'sold_items': int(item.sold_items or 0),
+                'total_sales': float(item.total_sales or 0)
+            } for item in sales_data
+        ]
+
+        return jsonify(result)
+    except Exception as e:
+        error_message = f"Error fetching sales data: {str(e)}"
+        print(error_message)
+        return jsonify({'error': error_message}), 500
+
+@app.route('/api/daily-sales', methods=['GET'])
+def get_daily_sales():
+    try:
+        print("Entering get_daily_sales function")
+        
+        # Calculate date range
+        end_date = datetime.now().date()
+        start_date = end_date - timedelta(days=29)
+        
+        print(f"Fetching sales data from {start_date} to {end_date}")
+
+        # Query to get daily sales for the last 30 days
+        daily_sales = db.session.query(
+            func.date(Order.order_date).label('date'),
+            func.sum(Order.total_amount).label('total_sales')
+        ).filter(
+            func.date(Order.order_date).between(start_date, end_date)
+        ).group_by(
+            func.date(Order.order_date)
+        ).order_by(
+            func.date(Order.order_date)
+        ).all()
+
+        print(f"Number of days with sales: {len(daily_sales)}")
+
+        # Convert to list of dictionaries
+        result = [
+            {
+                'date': date.strftime('%Y-%m-%d'),
+                'total_sales': float(total_sales)
+            } for date, total_sales in daily_sales
+        ]
+
+        print(f"Result: {result}")
+
+        return jsonify(result)
+    except Exception as e:
+        error_message = f"Error in get_daily_sales: {str(e)}"
+        print(error_message)
+        import traceback
+        print(traceback.format_exc())
+        return jsonify({'error': error_message}), 500
     
 if __name__ == '__main__':
     with app.app_context():
