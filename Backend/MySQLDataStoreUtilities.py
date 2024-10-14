@@ -11,6 +11,7 @@ from MongoDBDataStoreUtilities import mongo_bp
 import mysql.connector
 from bson import ObjectId
 import xml.etree.ElementTree as ET
+import logging
 
 
 app = Flask(__name__)
@@ -318,272 +319,6 @@ def initialize_product_data(xml_file_path):
         discount = round(random.uniform(2, 15), 2) if random.choice([True, False]) else 0
         return rebate, discount
     
-
-# Add products to each category
-    # products = [
-    #     # Smart Doorbells
-    #     Product(
-    #         name="Ring Video Doorbell", 
-    #         description="Smart doorbell with HD video and motion detection.",
-    #         price=199.99, 
-    #         images='', 
-    #         category_id=categories[0].id, 
-    #         accessories=json.dumps(sample_accessories[:2]),
-    #         manufacturer_rebate=random_discount_or_rebate()[0], 
-    #         retailer_discount=random_discount_or_rebate()[1]
-    #     ),
-    #     Product(
-    #         name="Nest Hello", 
-    #         description="Wired doorbell with HD video and person alerts.",
-    #         price=229.99, 
-    #         images='', 
-    #         category_id=categories[0].id, 
-    #         accessories=json.dumps(sample_accessories),
-    #         manufacturer_rebate=random_discount_or_rebate()[0], 
-    #         retailer_discount=random_discount_or_rebate()[1]
-    #     ),
-    #     Product(
-    #         name="Arlo Video Doorbell", 
-    #         description="Smart doorbell with wide-angle view and HDR.",
-    #         price=149.99, 
-    #         images='', 
-    #         category_id=categories[0].id, 
-    #         accessories=json.dumps(sample_accessories),
-    #         manufacturer_rebate=random_discount_or_rebate()[0], 
-    #         retailer_discount=random_discount_or_rebate()[1]
-    #     ),
-    #     Product(
-    #         name="SimpliSafe Doorbell", 
-    #         description="Easy-to-install doorbell with video and audio.",
-    #         price=169.99, 
-    #         images='', 
-    #         category_id=categories[0].id, 
-    #         accessories=json.dumps(sample_accessories[:1]),
-    #         manufacturer_rebate=random_discount_or_rebate()[0], 
-    #         retailer_discount=random_discount_or_rebate()[1]
-    #     ),
-    #     Product(
-    #         name="Eufy Security Doorbell", 
-    #         description="Battery-powered video doorbell with 2K resolution.",
-    #         price=179.99, 
-    #         images='', 
-    #         category_id=categories[0].id, 
-    #         accessories=json.dumps(sample_accessories[1:]),
-    #         manufacturer_rebate=random_discount_or_rebate()[0], 
-    #         retailer_discount=random_discount_or_rebate()[1]
-    #     ),
-
-    #     # Smart Doorlocks
-    #     Product(
-    #         name="August Smart Lock", 
-    #         description="Keyless entry and remote control for your door.",
-    #         price=229.99, 
-    #         images='', 
-    #         category_id=categories[1].id, 
-    #         accessories=json.dumps(sample_accessories[:2]),
-    #         manufacturer_rebate=random_discount_or_rebate()[0], 
-    #         retailer_discount=random_discount_or_rebate()[1]
-    #     ),
-    #     Product(
-    #         name="Yale Assure Lock", 
-    #         description="Touchscreen smart lock with keyless entry.",
-    #         price=199.99, 
-    #         images='', 
-    #         category_id=categories[1].id, 
-    #         accessories=json.dumps(sample_accessories),
-    #         manufacturer_rebate=random_discount_or_rebate()[0], 
-    #         retailer_discount=random_discount_or_rebate()[1]
-    #     ),
-    #     Product(
-    #         name="Schlage Encode", 
-    #         description="Smart lock with built-in WiFi.",
-    #         price=249.99, 
-    #         images='', 
-    #         category_id=categories[1].id, 
-    #         accessories=json.dumps(sample_accessories),
-    #         manufacturer_rebate=random_discount_or_rebate()[0], 
-    #         retailer_discount=random_discount_or_rebate()[1]
-    #     ),
-    #     Product(
-    #         name="Ultraloq U-Bolt Pro", 
-    #         description="Smart lock with fingerprint ID.",
-    #         price=159.99, 
-    #         images='', 
-    #         category_id=categories[1].id, 
-    #         accessories=json.dumps(sample_accessories[:1]),
-    #         manufacturer_rebate=random_discount_or_rebate()[0], 
-    #         retailer_discount=random_discount_or_rebate()[1]
-    #     ),
-    #     Product(
-    #         name="Kwikset SmartCode", 
-    #         description="Deadbolt smart lock with customizable entry codes.",
-    #         price=179.99, 
-    #         images='', 
-    #         category_id=categories[1].id, 
-    #         accessories=json.dumps(sample_accessories[1:]),
-    #         manufacturer_rebate=random_discount_or_rebate()[0], 
-    #         retailer_discount=random_discount_or_rebate()[1]
-    #     ),
-
-    #     # Smart Speakers
-    #     Product(
-    #         name="Amazon Echo", 
-    #         description="Voice-controlled smart speaker with Alexa.",
-    #         price=99.99, 
-    #         images='', 
-    #         category_id=categories[2].id, 
-    #         accessories=json.dumps(sample_accessories[:2]),
-    #         manufacturer_rebate=random_discount_or_rebate()[0], 
-    #         retailer_discount=random_discount_or_rebate()[1]
-    #     ),
-    #     Product(
-    #         name="Google Nest Audio", 
-    #         description="Smart speaker with Google Assistant.",
-    #         price=89.99, 
-    #         images='', 
-    #         category_id=categories[2].id, 
-    #         accessories=json.dumps(sample_accessories),
-    #         manufacturer_rebate=random_discount_or_rebate()[0], 
-    #         retailer_discount=random_discount_or_rebate()[1]
-    #     ),
-    #     Product(
-    #         name="Apple HomePod Mini", 
-    #         description="Smart speaker with Siri integration.",
-    #         price=99.99, 
-    #         images='', 
-    #         category_id=categories[2].id, 
-    #         accessories=json.dumps(sample_accessories),
-    #         manufacturer_rebate=random_discount_or_rebate()[0], 
-    #         retailer_discount=random_discount_or_rebate()[1]
-    #     ),
-    #     Product(
-    #         name="Sonos One", 
-    #         description="Smart speaker with voice control and excellent sound.",
-    #         price=199.99, 
-    #         images='', 
-    #         category_id=categories[2].id, 
-    #         accessories=json.dumps(sample_accessories[:1]),
-    #         manufacturer_rebate=random_discount_or_rebate()[0], 
-    #         retailer_discount=random_discount_or_rebate()[1]
-    #     ),
-    #     Product(
-    #         name="Bose Home Speaker 500", 
-    #         description="Smart speaker with Alexa and Google Assistant.",
-    #         price=299.99, 
-    #         images='', 
-    #         category_id=categories[2].id, 
-    #         accessories=json.dumps(sample_accessories[1:]),
-    #         manufacturer_rebate=random_discount_or_rebate()[0], 
-    #         retailer_discount=random_discount_or_rebate()[1]
-    #     ),
-
-    #     # Smart Lightings
-    #     Product(
-    #         name="Philips Hue Bulb", 
-    #         description="Smart light bulb with app control.",
-    #         price=49.99, 
-    #         images='', 
-    #         category_id=categories[3].id, 
-    #         accessories=json.dumps(sample_accessories[:2]),
-    #         manufacturer_rebate=random_discount_or_rebate()[0], 
-    #         retailer_discount=random_discount_or_rebate()[1]
-    #     ),
-    #     Product(
-    #         name="LIFX Smart Bulb", 
-    #         description="Color-changing smart bulb.",
-    #         price=59.99, 
-    #         images='', 
-    #         category_id=categories[3].id, 
-    #         accessories=json.dumps(sample_accessories),
-    #         manufacturer_rebate=random_discount_or_rebate()[0], 
-    #         retailer_discount=random_discount_or_rebate()[1]
-    #     ),
-    #     Product(
-    #         name="Nanoleaf Light Panels", 
-    #         description="Customizable LED light panels.",
-    #         price=199.99, 
-    #         images='', 
-    #         category_id=categories[3].id, 
-    #         accessories=json.dumps(sample_accessories),
-    #         manufacturer_rebate=random_discount_or_rebate()[0], 
-    #         retailer_discount=random_discount_or_rebate()[1]
-    #     ),
-    #     Product(
-    #         name="Wyze Bulb", 
-    #         description="Affordable smart bulb with voice control.",
-    #         price=29.99, 
-    #         images='', 
-    #         category_id=categories[3].id, 
-    #         accessories=json.dumps(sample_accessories[:1]),
-    #         manufacturer_rebate=random_discount_or_rebate()[0], 
-    #         retailer_discount=random_discount_or_rebate()[1]
-    #     ),
-    #     Product(
-    #         name="TP-Link Kasa Bulb", 
-    #         description="Smart bulb with adjustable brightness.",
-    #         price=29.99, 
-    #         images='', 
-    #         category_id=categories[3].id, 
-    #         accessories=json.dumps(sample_accessories[1:]),
-    #         manufacturer_rebate=random_discount_or_rebate()[0], 
-    #         retailer_discount=random_discount_or_rebate()[1]
-    #     ),
-
-    #     # Smart Thermostats
-    #     Product(
-    #         name="Nest Learning Thermostat", 
-    #         description="Smart thermostat that learns your preferences.",
-    #         price=249.99, 
-    #         images='', 
-    #         category_id=categories[4].id, 
-    #         accessories=json.dumps(sample_accessories[:2]),
-    #         manufacturer_rebate=random_discount_or_rebate()[0], 
-    #         retailer_discount=random_discount_or_rebate()[1]
-    #     ),
-    #     Product(
-    #         name="Ecobee SmartThermostat", 
-    #         description="Thermostat with voice control and remote sensors.",
-    #         price=219.99, 
-    #         images='', 
-    #         category_id=categories[4].id, 
-    #         accessories=json.dumps(sample_accessories),
-    #         manufacturer_rebate=random_discount_or_rebate()[0], 
-    #         retailer_discount=random_discount_or_rebate()[1]
-    #     ),
-    #     Product(
-    #         name="Honeywell T9", 
-    #         description="Smart thermostat with room sensors.",
-    #         price=199.99, 
-    #         images='', 
-    #         category_id=categories[4].id, 
-    #         accessories=json.dumps(sample_accessories),
-    #         manufacturer_rebate=random_discount_or_rebate()[0], 
-    #         retailer_discount=random_discount_or_rebate()[1]
-    #     ),
-    #     Product(
-    #         name="Emerson Sensi", 
-    #         description="Smart thermostat with mobile app control.",
-    #         price=129.99, 
-    #         images='', 
-    #         category_id=categories[4].id, 
-    #         accessories=json.dumps(sample_accessories[:1]),
-    #         manufacturer_rebate=random_discount_or_rebate()[0], 
-    #         retailer_discount=random_discount_or_rebate()[1]
-    #     ),
-    #     Product(
-    #         name="Lux Kono Smart Thermostat", 
-    #         description="Stylish thermostat with smart features.",
-    #         price=139.99, 
-    #         images='', 
-    #         category_id=categories[4].id, 
-    #         accessories=json.dumps(sample_accessories[1:]),
-    #         manufacturer_rebate=random_discount_or_rebate()[0], 
-    #         retailer_discount=random_discount_or_rebate()[1]
-    #     )
-    # ]
-
-    # db.session.add_all(products)
-    # db.session.commit()
     create_sample_data()
     if not User.query.first():
         sample_users = [
@@ -743,28 +478,6 @@ def update_cart_item(item_id):
         return jsonify({'error': str(e)}), 500
 
 
-
-# New route to get order history for a user
-# @app.route('/api/order-history/<string:user_name>', methods=['GET'])
-# def get_order_history(user_name):
-#     try:
-#         orders = Order.query.filter_by(user_name=user_name).order_by(Order.order_date.desc()).all()
-#         order_list = [
-#             {
-#                 'id': order.id,
-#                 'confirmation_number': order.confirmation_number,
-#                 'total_amount': order.total_amount,
-#                 'order_date': order.order_date.strftime('%Y-%m-%d %H:%M:%S'),
-#                 'delivery_date': order.delivery_date.strftime('%Y-%m-%d'),
-#                 'delivery_option': order.delivery_option,
-#                 'pickup_location': order.pickup_location
-#             }
-#             for order in orders
-#         ]
-#         return jsonify(order_list), 200
-#     except Exception as e:
-#         print(f"Error fetching order history: {e}")
-#         return jsonify({'error': str(e)}), 500
 @app.route('/api/productsget', methods=['GET'])
 def get_products_get():
     products = Product.query.all()
@@ -840,69 +553,56 @@ def clear_cart():
         return jsonify({'message': 'Cart cleared successfully'}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-# @app.route('/api/cart/clear', methods=['DELETE'])
-# def clear_cart():
-#     try:
-#         db.session.query(CartItem).delete()
-#         db.session.commit()
-#         return jsonify({'message': 'Cart cleared successfully'}), 200
-#     except Exception as e:
-#         return jsonify({'error': str(e)}), 500
-
 
 def update_product_catalog_xml(product_data, operation='add'):
-    tree = ET.parse('ProductCatalog.xml')
-    root = tree.getroot()
+    try:
+        tree = ET.parse('ProductCatalog.xml')
+        root = tree.getroot()
 
-    if operation == 'add':
-        product_elem = ET.SubElement(root, 'product')
-        ET.SubElement(product_elem, 'id').text = product_data['id']
-        ET.SubElement(product_elem, 'name').text = product_data['name']
-        ET.SubElement(product_elem, 'description').text = product_data['description']
-        ET.SubElement(product_elem, 'price').text = str(product_data['price'])
-        ET.SubElement(product_elem, 'category').text = product_data['category']
+        if operation == 'delete':
+            for product in root.findall('product'):
+                if product.find('id').text == product_data['id'] or product.find('name').text == product_data['name']:
+                    root.remove(product)
+                    break
+        elif operation == 'update':
+            updated = False
+            for product in root.findall('product'):
+                if product.find('id').text == product_data['id'] or product.find('name').text == product_data['name']:
+                    for key, value in product_data.items():
+                        if key == 'accessories':
+                            accessories = product.find('accessories')
+                            accessories.clear()
+                            for accessory in value:
+                                acc_elem = ET.SubElement(accessories, 'accessory')
+                                ET.SubElement(acc_elem, 'name').text = str(accessory['name'])
+                                ET.SubElement(acc_elem, 'price').text = str(accessory['price'])
+                        else:
+                            elem = product.find(key)
+                            if elem is None:
+                                elem = ET.SubElement(product, key)
+                            elem.text = str(value)
+                    updated = True
+                    break
+            if not updated:
+                operation = 'add'  # If product not found, add it as new
 
-        accessories_elem = ET.SubElement(product_elem, 'accessories')
-        for accessory in product_data.get('accessories', []):
-            accessory_elem = ET.SubElement(accessories_elem, 'accessory')
-            ET.SubElement(accessory_elem, 'name').text = accessory['name']
-            ET.SubElement(accessory_elem, 'price').text = str(accessory['price'])
+        if operation == 'add':
+            product_elem = ET.SubElement(root, 'product')
+            for key, value in product_data.items():
+                if key == 'accessories':
+                    accessories = ET.SubElement(product_elem, 'accessories')
+                    for accessory in value:
+                        acc_elem = ET.SubElement(accessories, 'accessory')
+                        ET.SubElement(acc_elem, 'name').text = str(accessory['name'])
+                        ET.SubElement(acc_elem, 'price').text = str(accessory['price'])
+                else:
+                    ET.SubElement(product_elem, key).text = str(value)
 
-        ET.SubElement(product_elem, 'warranty_options').text = ','.join(product_data.get('warranty_options', []))
-        ET.SubElement(product_elem, 'retailer_discount').text = str(product_data.get('retailer_discount', 0.0))
-        ET.SubElement(product_elem, 'manufacturer_rebate').text = str(product_data.get('manufacturer_rebate', 0.0))
-        ET.SubElement(product_elem, 'available_items').text = str(product_data.get('available_items', 0.0))
-        
-
-    elif operation == 'update':
-        for product in root.findall('product'):
-            if product.find('id').text == product_data['id']:
-                product.find('name').text = product_data['name']
-                product.find('description').text = product_data['description']
-                product.find('price').text = str(product_data['price'])
-                product.find('category').text = product_data['category']
-                
-                accessories_elem = product.find('accessories')
-                accessories_elem.clear()
-                for accessory in product_data.get('accessories', []):
-                    accessory_elem = ET.SubElement(accessories_elem, 'accessory')
-                    ET.SubElement(accessory_elem, 'name').text = accessory['name']
-                    ET.SubElement(accessory_elem, 'price').text = str(accessory['price'])
-
-                product.find('warranty_options').text = ','.join(product_data.get('warranty_options', []))
-                product.find('retailer_discount').text = str(product_data.get('retailer_discount', 0.0))
-                product.find('manufacturer_rebate').text = str(product_data.get('manufacturer_rebate', 0.0))
-                product.find('available_items').text = str(product_data.get('available_items', 0.0))
-                
-                break
-
-    elif operation == 'delete':
-        for product in root.findall('product'):
-            if product.find('id').text == product_data['id']:
-                root.remove(product)
-                break
-
-    tree.write('ProductCatalog.xml')
+        tree.write('ProductCatalog.xml', encoding='utf-8', xml_declaration=True)
+        print(f"XML catalog updated successfully for operation: {operation}")
+    except Exception as e:
+        print(f"Error updating XML catalog: {e}")
+        raise
 
 @app.route('/api/products/add', methods=['POST'])
 def add_product():
@@ -914,23 +614,26 @@ def add_product():
             db.session.add(category)
             db.session.commit()
 
+        # Handle numeric fields
+        price = float(data.get('price', 0))
+        retailer_discount = float(data.get('retailer_discount', 0))
+        manufacturer_rebate = float(data.get('manufacturer_rebate', 0))
+        available_items = int(data.get('available_items', 0))
+
         new_product = Product(
             id=str(uuid.uuid4()),
             name=data['name'],
             description=data['description'],
-            price=data['price'],
+            price=price,
             category_id=category.id,
             accessories=json.dumps(data.get('accessories', [])),
             warranty_options=json.dumps(data.get('warranty_options', [])),
-            retailer_discount=data.get('retailer_discount', 0.0),
-            manufacturer_rebate=data.get('manufacturer_rebate', 0.0),
-            available_items=data.get('available_items', 0.0)
+            retailer_discount=retailer_discount,
+            manufacturer_rebate=manufacturer_rebate,
+            available_items=available_items
         )
         db.session.add(new_product)
         db.session.commit()
-
-        # Update the in-memory map
-        products_map[new_product.id] = data
 
         # Update the XML file
         product_data = {
@@ -948,11 +651,9 @@ def add_product():
         update_product_catalog_xml(product_data, 'add')
 
         return jsonify({'message': 'Product added successfully', 'product_id': new_product.id}), 201
-    except KeyError as e:
-        print(f"Missing required field: {e}")
-        return jsonify({'error': f'Missing required field: {e}'}), 400
     except Exception as e:
         print(f"Error adding product: {e}")
+        db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/products/update/<string:product_id>', methods=['PUT'])
@@ -963,41 +664,23 @@ def update_product(product_id):
         if not product:
             return jsonify({'error': 'Product not found'}), 404
 
-        category = Category.query.filter_by(name=data['category']).first()
-        if not category:
-            category = Category(name=data['category'])
-            db.session.add(category)
-            db.session.commit()
-
+        # Update product in database
         product.name = data['name']
         product.description = data['description']
-        product.price = data['price']
-        product.category_id = category.id
+        product.price = float(data['price'])
+        product.category_id = data['category']
         product.accessories = json.dumps(data.get('accessories', []))
         product.warranty_options = json.dumps(data.get('warranty_options', []))
-        product.retailer_discount = data.get('retailer_discount', 0.0)
-        product.manufacturer_rebate = data.get('manufacturer_rebate', 0.0)
-        product.available_items = data.get('available_items', 0.0)
+        product.retailer_discount = float(data.get('retailer_discount', 0.0))
+        product.manufacturer_rebate = float(data.get('manufacturer_rebate', 0.0))
+        product.available_items = int(data.get('available_items', 0))
 
         db.session.commit()
 
-        # Update the in-memory map
-        products_map[product_id] = data
-
-        # Update the XML file
-        product_data = {
-            'id': product.id,
-            'name': product.name,
-            'description': product.description,
-            'price': product.price,
-            'category': category.name,
-            'accessories': json.loads(product.accessories),
-            'warranty_options': json.loads(product.warranty_options),
-            'retailer_discount': product.retailer_discount,
-            'manufacturer_rebate': product.manufacturer_rebate,
-            'available_items': product.available_items
-        }
-        update_product_catalog_xml(product_data, 'update')
+        # Update XML
+        xml_data = data.copy()
+        xml_data['id'] = product_id  # Ensure we're using the database ID
+        update_product_catalog_xml(xml_data, 'update')
 
         return jsonify({'message': 'Product updated successfully'}), 200
     except Exception as e:
@@ -1011,15 +694,13 @@ def delete_product(product_id):
         if not product:
             return jsonify({'error': 'Product not found'}), 404
 
+        product_name = product.name  # Get the name before deleting
+
         db.session.delete(product)
         db.session.commit()
 
-        # Remove from the in-memory map
-        if product_id in products_map:
-            del products_map[product_id]
-
-        # Update the XML file
-        update_product_catalog_xml({'id': product_id}, 'delete')
+        # Update XML
+        update_product_catalog_xml({'id': product_id, 'name': product_name}, 'delete')
 
         return jsonify({'message': 'Product deleted successfully'}), 200
     except Exception as e:
@@ -1434,6 +1115,7 @@ def get_daily_sales():
         return jsonify({'error': error_message}), 500
     
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.DEBUG)
     with app.app_context():
         db.create_all()
         initialize_product_data('ProductCatalog.xml')

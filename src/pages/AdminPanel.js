@@ -58,38 +58,46 @@ function AdminPanel() {
 
   const handleAddProduct = (e) => {
     e.preventDefault();
-    const newProduct = {
+    const productData = {
       ...formData,
-      accessories: formData.accessories,
-      retailer_discount: parseFloat(formData.retailer_discount) || 0, // Ensure float value
-      manufacturer_rebate: parseFloat(formData.manufacturer_rebate) || 0 // Ensure float value
+      price: parseFloat(formData.price) || 0,
+      retailer_discount: parseFloat(formData.retailer_discount) || 0,
+      manufacturer_rebate: parseFloat(formData.manufacturer_rebate) || 0,
+      available_items: parseInt(formData.available_items) || 0
     };
-
+  
     fetch('http://127.0.0.1:5001/api/products/add', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(newProduct)
+      body: JSON.stringify(productData)
     })
-      .then(response => response.json())
-      .then(data => {
-        if (data.error) {
-          console.error('Error adding product:', data.error);
-        } else {
-          fetchProducts();
-          setFormData({
-            name: '',
-            description: '',
-            price: '',
-            category: '',
-            accessories: [],
-            retailer_discount: '',
-            manufacturer_rebate: ''
-          });
+      .then(response => {
+        if (!response.ok) {
+          return response.json().then(err => { throw err; });
         }
+        return response.json();
       })
-      .catch(error => console.error('Error:', error));
+      .then(data => {
+        console.log('Product added successfully:', data);
+        fetchProducts();
+        setFormData({
+          name: '',
+          description: '',
+          price: '',
+          category: '',
+          accessories: [],
+          retailer_discount: '',
+          manufacturer_rebate: '',
+          available_items: ''
+        });
+        alert('Product added successfully!');
+      })
+      .catch(error => {
+        console.error('Error adding product:', error);
+        alert(`Failed to add product: ${error.error || error.message}`);
+      });
   };
 
   const handleDeleteProduct = (productId) => {
@@ -119,32 +127,55 @@ function AdminPanel() {
   const handleUpdateProduct = (e) => {
     e.preventDefault();
     
+    // Create a copy of formData
+    const updatedFormData = { ...formData };
+  
+    // Convert empty strings to null or 0 for numeric fields
+    ['retailer_discount', 'manufacturer_rebate', 'available_items'].forEach(field => {
+      if (updatedFormData[field] === '') {
+        updatedFormData[field] = null; // or 0, depending on your preference
+      } else {
+        updatedFormData[field] = parseFloat(updatedFormData[field]);
+      }
+    });
+  
     fetch(`http://127.0.0.1:5001/api/products/update/${selectedProduct.id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(formData)
+      body: JSON.stringify(updatedFormData)
     })
-      .then(response => response.json())
-      .then(data => {
-        if (data.error) {
-          console.error('Error updating product:', data.error);
-        } else {
-          fetchProducts();
-          setSelectedProduct(null);
-          setFormData({
-            name: '',
-            description: '',
-            price: '',
-            category: '',
-            accessories: [],
-            retailer_discount: '',
-            manufacturer_rebate: ''
-          });
-        }
-      })
-      .catch(error => console.error('Error:', error));
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(err => { throw err; });
+      }
+      return response.json();
+    })
+    .then(data => {
+      console.log('Product updated successfully:', data);
+      fetchProducts();
+      setSelectedProduct(null);
+      setFormData({
+        name: '',
+        description: '',
+        price: '',
+        category: '',
+        accessories: [],
+        retailer_discount: '',
+        manufacturer_rebate: '',
+        available_items: ''
+      });
+    })
+    .catch(error => {
+      console.error('Error updating product:', error);
+      if (error.error === 'Product not found in database or XML') {
+        alert('This product no longer exists. It may have been deleted. The product list will now refresh.');
+        fetchProducts();
+      } else {
+        alert(`Failed to update product: ${error.error || 'Unknown error'}`);
+      }
+    });
   };
 
   const handleCancelEdit = () => {
