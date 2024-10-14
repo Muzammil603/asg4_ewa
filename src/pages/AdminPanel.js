@@ -10,8 +10,9 @@ function AdminPanel() {
     price: '',
     category: '',
     accessories: [],
-    retailer_discount: '', // Add retailer discount
-    manufacturer_rebate: '' // Add manufacturer rebate
+    retailer_discount: '',
+    manufacturer_rebate: '',
+    available_items: ''
   });
   const [accessoryData, setAccessoryData] = useState({
     name: '',
@@ -119,21 +120,20 @@ function AdminPanel() {
     setSelectedProduct(product);
     setFormData({
       ...product,
-      retailer_discount: product.retailer_discount || '', // Load existing discount
-      manufacturer_rebate: product.manufacturer_rebate || '' // Load existing rebate
+      retailer_discount: product.retailer_discount || '',
+      manufacturer_rebate: product.manufacturer_rebate || '',
+      available_items: product.available_items || ''
     });
   };
 
   const handleUpdateProduct = (e) => {
     e.preventDefault();
     
-    // Create a copy of formData
     const updatedFormData = { ...formData };
   
-    // Convert empty strings to null or 0 for numeric fields
-    ['retailer_discount', 'manufacturer_rebate', 'available_items'].forEach(field => {
+    ['retailer_discount', 'manufacturer_rebate', 'available_items', 'price'].forEach(field => {
       if (updatedFormData[field] === '') {
-        updatedFormData[field] = null; // or 0, depending on your preference
+        updatedFormData[field] = null;
       } else {
         updatedFormData[field] = parseFloat(updatedFormData[field]);
       }
@@ -187,10 +187,10 @@ function AdminPanel() {
       category: '',
       accessories: [],
       retailer_discount: '',
-      manufacturer_rebate: ''
+      manufacturer_rebate: '',
+      available_items: ''
     });
   };
-  
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-gray-100 min-h-screen">
@@ -289,29 +289,38 @@ function AdminPanel() {
           </ul>
         </div>
         <div className="mb-4">
-        <label htmlFor="retailer_discount" className="block text-sm font-medium text-gray-700">Retailer Discount:</label>
-        <input
-          type="number"
-          id="retailer_discount"
-          name="retailer_discount"
-          value={formData.retailer_discount}
-          onChange={handleInputChange}
-          className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
-        />
-      </div>
-
-      <div className="mb-4">
-        <label htmlFor="manufacturer_rebate" className="block text-sm font-medium text-gray-700">Manufacturer Rebate:</label>
-        <input
-          type="number"
-          id="manufacturer_rebate"
-          name="manufacturer_rebate"
-          value={formData.manufacturer_rebate}
-          onChange={handleInputChange}
-          className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
-        />
-      </div>
-
+          <label htmlFor="retailer_discount" className="block text-sm font-medium text-gray-700">Retailer Discount:</label>
+          <input
+            type="number"
+            id="retailer_discount"
+            name="retailer_discount"
+            value={formData.retailer_discount}
+            onChange={handleInputChange}
+            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
+          />
+        </div>
+        <div className="mb-4">
+          <label htmlFor="manufacturer_rebate" className="block text-sm font-medium text-gray-700">Manufacturer Rebate:</label>
+          <input
+            type="number"
+            id="manufacturer_rebate"
+            name="manufacturer_rebate"
+            value={formData.manufacturer_rebate}
+            onChange={handleInputChange}
+            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
+          />
+        </div>
+        <div className="mb-4">
+          <label htmlFor="available_items" className="block text-sm font-medium text-gray-700">Available Items:</label>
+          <input
+            type="number"
+            id="available_items"
+            name="available_items"
+            value={formData.available_items}
+            onChange={handleInputChange}
+            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
+          />
+        </div>
         <div className="flex gap-4">
           <button
             type="submit"
@@ -335,7 +344,7 @@ function AdminPanel() {
         {products.map((product) => (
           <li key={product.id} className="mb-2 flex justify-between items-center">
             <div>
-              <strong>{product.name}</strong>
+              <strong>{product.name}</strong> - Available: {product.available_items}
             </div>
             <div className="flex gap-2">
               <button

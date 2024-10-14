@@ -23,7 +23,7 @@ const Trending = () => {
         setLoading(false);
       } catch (error) {
         console.error('Error fetching trending data:', error);
-        setError('Failed to fetch trending data');
+        setError('Failed to fetch trending data. Please try again later.');
         setLoading(false);
       }
     };
@@ -32,11 +32,20 @@ const Trending = () => {
   }, []);
 
   if (loading) {
-    return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="text-center text-red-500">{error}</div>;
+    return (
+      <div className="container mx-auto mt-10 p-6 bg-red-100 rounded-lg shadow-xl text-center">
+        <h2 className="text-2xl font-bold text-red-600 mb-4">Error</h2>
+        <p className="text-red-500">{error}</p>
+      </div>
+    );
   }
 
   return (
@@ -88,9 +97,9 @@ const Trending = () => {
         <h3 className="text-2xl font-semibold mb-4 text-gray-700 border-b-2 border-purple-500 pb-2">Top 5 Most Sold Products</h3>
         {topSoldProducts.length > 0 ? (
           <ul className="space-y-4">
-            {topSoldProducts.map((product, index) => (
+            {topSoldProducts.map((product) => (
               <li
-                key={index}
+                key={product.product_id}
                 className="bg-purple-100 p-4 rounded-lg shadow-md hover:bg-purple-200 transition-all duration-200"
               >
                 <div className="text-lg font-medium">Product Name: {product.product_name}</div>

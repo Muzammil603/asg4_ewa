@@ -1004,39 +1004,36 @@ def get_top_zip_codes():
 # Route to get top five most sold products
 @app.route('/api/trending/sold-products', methods=['GET'])
 def get_top_sold_products():
-    orders = Order.query.all()
-    product_count = {}
-    
-    # Count the sold products
-    for order in orders:
-        order_items = json.loads(order.order_items)
-        for item in order_items:
-            product_id = item['id']
-            if product_id in product_count:
-                product_count[product_id] += 1
-            else:
-                product_count[product_id] = 1
-    
-    # Get the top 5 sold products
-    top_sold_products = sorted(product_count.items(), key=lambda x: x[1], reverse=True)[:5]
+    try:
+        # Query to get product sales data, ordered by sold items
+        sales_data = db.session.query(
+            Product.id,
+            Product.name,
+            func.sum(func.JSON_LENGTH(Order.order_items)).label('sold_items')
+        ).join(
+            Order,
+            text("JSON_CONTAINS(Order.order_items, CONCAT('{\"id\":\"', Product.id, '\"}'), '$')")
+        ).group_by(
+            Product.id
+        ).order_by(
+            func.sum(func.JSON_LENGTH(Order.order_items)).desc()
+        ).limit(5).all()
 
-    # Fetch product details using the product IDs
-    product_ids = [product_id for product_id, count in top_sold_products]
-    products = Product.query.filter(Product.id.in_(product_ids)).all()
-    product_map = {product.id: product.name for product in products}
-    
-    # Create the response
-    response = []
-    for product_id, count in top_sold_products:
-        product_name = product_map.get(product_id, "Unknown Product")
-        response.append({
-            "product_id": product_id,
-            "product_name": product_name,
-            "sold_count": count
-        })
-    print(response)
-    return jsonify(response)
+        # Convert the result to a list of dictionaries
+        result = [
+            {
+                'product_id': item.id,
+                'product_name': item.name,
+                'sold_count': int(item.sold_items or 0)
+            } for item in sales_data
+        ]
 
+        return jsonify(result)
+    except Exception as e:
+        error_message = f"Error fetching top sold products: {str(e)}"
+        print(error_message)
+        return jsonify({'error': error_message}), 500
+    
 @app.route('/api/sales', methods=['GET'])
 def get_sales_data():
     try:
