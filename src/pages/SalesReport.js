@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
+import { BASE_URL } from './config';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
@@ -25,7 +26,11 @@ function SalesReport() {
   const fetchSalesData = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch('http://127.0.0.1:5001/api/sales');
+      const response = await fetch(BASE_URL + '/sales', {
+        headers: {
+          'ngrok-skip-browser-warning': 'true'
+        }
+      });
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -42,7 +47,11 @@ function SalesReport() {
 
   const fetchDailySalesData = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:5001/api/daily-sales');
+      const response = await fetch(BASE_URL + '/daily-sales', {
+        headers: {
+          'ngrok-skip-browser-warning': 'true'
+        }
+      });
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }

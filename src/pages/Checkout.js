@@ -1,6 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CartContext } from '../context/CartContext';
+import { BASE_URL } from './config';
 
 function Checkout() {
   const { cartItems, clearCart } = useContext(CartContext);
@@ -24,7 +25,12 @@ function Checkout() {
 
   const fetchStoreLocations = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:5001/api/store-locations');
+      const response = await fetch(`${BASE_URL}/store-locations`, {
+        method: 'GET', // Optional, as 'GET' is the default method
+        headers: {
+          'ngrok-skip-browser-warning': 'true', // Added header to skip ngrok warning
+        },
+      });
       if (!response.ok) {
         throw new Error('Failed to fetch store locations');
       }
@@ -84,10 +90,11 @@ function Checkout() {
     console.log('Sending order data:', JSON.stringify(orderData, null, 2));
 
     try {
-      const response = await fetch('http://127.0.0.1:5001/api/place-order', {
+      const response = await fetch(BASE_URL + '/place-order', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'ngrok-skip-browser-warning': 'true',
         },
         body: JSON.stringify(orderData),
       });

@@ -13,9 +13,9 @@ mongo_db = mongo_client['smarthomes']
 reviews_collection = mongo_db['product_reviews']
 flags_collection = mongo_db['flags']
 
-
 def get_mongo_connection():
     return mongo_client
+
 @mongo_bp.route('/api/trending/liked-products', methods=['GET'])
 def get_top_liked_products():
     try:
@@ -34,7 +34,6 @@ def get_top_liked_products():
     except Exception as e:
         print(f"Error fetching top liked products: {e}")
         return jsonify({"error": str(e)}), 500
-
 
 @mongo_bp.route('/api/product-review', methods=['POST'])
 def submit_product_review():
@@ -161,8 +160,6 @@ def generate_sample_reviews():
         )
     else:
         print("No sample reviews to add.")
-
-
 
 # Generate sample reviews when this module is imported
 generate_sample_reviews()

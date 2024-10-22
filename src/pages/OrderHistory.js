@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { BASE_URL } from './config';
 
 function OrderHistory() {
   const [orders, setOrders] = useState([]);
@@ -8,7 +9,11 @@ function OrderHistory() {
   useEffect(() => {
     const fetchOrderHistory = async () => {
       try {
-        const response = await fetch(`http://127.0.0.1:5001/api/orderhistory/${currentUsername}`);
+        const response = await fetch(`${BASE_URL}/orderhistory/${currentUsername}`, {
+          headers: {
+            'ngrok-skip-browser-warning': 'true'
+          }
+        });
         if (!response.ok) {
           throw new Error('Failed to fetch order history.');
         }
@@ -24,8 +29,12 @@ function OrderHistory() {
 
   const handleCancelOrder = async (confirmationNumber) => {
     try {
-      const response = await fetch(`http://127.0.0.1:5001/api/orders/cancel/${confirmationNumber}`, {
-        method: 'PUT',
+      const response = await fetch(`${BASE_URL}/orders/cancel/${confirmationNumber}`, {
+        method: 'PUT', 
+          headers: {
+            'ngrok-skip-browser-warning': 'true'
+          }
+        
       });
       if (response.ok) {
         // Update the status of the order to "Cancelled" in the local state

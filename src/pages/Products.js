@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
+import { BASE_URL } from './config';
 
 function Products() {
   const [products, setProducts] = useState([]);
@@ -13,8 +14,12 @@ function Products() {
   }, []);
 
   const fetchProducts = (query = '') => {
-    const searchUrl = query ? `http://127.0.0.1:5001/api/products/search?query=${query}` : 'http://127.0.0.1:5001/api/products';
-    fetch(searchUrl)
+    const searchUrl = query ? `${BASE_URL}/products/search?query=${query}` : `${BASE_URL}/products`;
+    fetch(searchUrl, {
+      headers: {
+        'ngrok-skip-browser-warning': 'true'
+      }
+    })
       .then(response => response.json())
       .then(data => {
         setProducts(data);
@@ -29,7 +34,7 @@ function Products() {
 
     // Fetch suggestions based on search term
     if (value.length > 0) {
-      fetch(`http://127.0.0.1:5001/api/products/search?query=${value}`)
+      fetch(`${BASE_URL}/products/search?query=${value}`)
         .then(response => response.json())
         .then(data => setSuggestions(data))
         .catch(error => console.error('Error fetching suggestions:', error));

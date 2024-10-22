@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
+import { BASE_URL } from './config';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
@@ -20,7 +21,11 @@ function InventoryPage() {
 
   const fetchProducts = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:5001/api/products');
+      const response = await fetch(BASE_URL + '/products', {
+        headers: {
+          'ngrok-skip-browser-warning': 'true'
+        }
+      });
       const data = await response.json();
       setProducts(data);
     } catch (error) {

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { BASE_URL } from './config';
 
 function OrderManagement() {
   const [orders, setOrders] = useState([]);
@@ -35,10 +36,26 @@ function OrderManagement() {
     setError(null);
     try {
       const [ordersRes, usersRes, productsRes, locationsRes] = await Promise.all([
-        fetch('http://127.0.0.1:5001/api/orders'),
-        fetch('http://127.0.0.1:5001/api/customers'),
-        fetch('http://127.0.0.1:5001/api/products'),
-        fetch('http://127.0.0.1:5001/api/store-locations')
+        fetch(`${BASE_URL}/orders`, {
+          headers: {
+            'ngrok-skip-browser-warning': 'true'
+          }
+        }),
+        fetch(`${BASE_URL}/customers`, {
+          headers: {
+            'ngrok-skip-browser-warning': 'true'
+          }
+        }),
+        fetch(`${BASE_URL}/products`, {
+          headers: {
+            'ngrok-skip-browser-warning': 'true'
+          }
+        }),
+        fetch(`${BASE_URL}/store-locations`, {
+          headers: {
+            'ngrok-skip-browser-warning': 'true'
+          }
+        })
       ]);
 
       const [ordersData, usersData, productsData, locationsData] = await Promise.all([
@@ -141,13 +158,14 @@ function OrderManagement() {
     try {
       const method = selectedOrder ? 'PUT' : 'POST';
       const endpoint = selectedOrder 
-        ? `http://127.0.0.1:5001/api/orders/update/${selectedOrder.id}` 
-        : 'http://127.0.0.1:5001/api/orders/add';
+        ? `${BASE_URL}/orders/update/${selectedOrder.id}` 
+        : `${BASE_URL}/orders/add`;
       
       const response = await fetch(endpoint, {
         method: method,
         headers: {
           'Content-Type': 'application/json',
+          'ngrok-skip-browser-warning': 'true',
         },
         body: JSON.stringify(orderFormData),
       });
@@ -168,8 +186,12 @@ function OrderManagement() {
 
   const handleDeleteOrder = async (orderId) => {
     try {
-      const response = await fetch(`http://127.0.0.1:5001/api/orders/delete/${orderId}`, {
-        method: 'DELETE',
+      const response = await fetch(`${BASE_URL}/orders/delete/${orderId}`, {
+        method: 'DELETE', 
+          headers: {
+            'ngrok-skip-browser-warning': 'true'
+          }
+        
       });
       if (response.ok) {
         loadData();

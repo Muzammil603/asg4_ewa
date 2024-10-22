@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { FaStar } from 'react-icons/fa';
+import { BASE_URL } from './config';
 
 const ProductReviews = () => {
   const [reviews, setReviews] = useState([]);
@@ -14,8 +15,16 @@ const ProductReviews = () => {
       try {
         setIsLoading(true);
         const [reviewsResponse, productsResponse] = await Promise.all([
-          axios.get('http://127.0.0.1:5001/api/product-reviews'),
-          axios.get('http://127.0.0.1:5001/api/products'),
+          axios.get(`${BASE_URL}/product-reviews`, {
+            headers: {
+              'ngrok-skip-browser-warning': 'true'
+            }
+          }),
+          axios.get(`${BASE_URL}/products`, {
+            headers: {
+              'ngrok-skip-browser-warning': 'true'
+            }
+          }),
         ]);
 
         setReviews(reviewsResponse.data);

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { BASE_URL } from './config';
 
 function AuthPage({ setIsLoggedIn }) {
   const [isLogin, setIsLogin] = useState(true);
@@ -17,10 +18,11 @@ function AuthPage({ setIsLoggedIn }) {
   const handleAuth = () => {
     if (isLogin) {
       // Login logic
-      fetch('http://127.0.0.1:5001/api/login', {
+      fetch(`${BASE_URL}/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'ngrok-skip-browser-warning': 'true',
         },
         body: JSON.stringify({ email, password }),
       })
@@ -39,10 +41,12 @@ function AuthPage({ setIsLoggedIn }) {
         .catch(error => console.error('Error:', error));
     } else {
       // Signup logic
-      fetch('http://127.0.0.1:5001/api/register', {
+      fetch(`${BASE_URL}/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'ngrok-skip-browser-warning': 'true',
+          
         },
         body: JSON.stringify({ name, email, password, street, city, state, zipCode, role }),
       })

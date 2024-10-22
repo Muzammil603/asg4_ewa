@@ -1,4 +1,5 @@
 import React, { createContext, useState, useEffect } from 'react';
+import { BASE_URL } from './config';
 
 export const CartContext = createContext();
 
@@ -10,7 +11,11 @@ export const CartProvider = ({ children }) => {
   }, []);
 
   const fetchCartItems = () => {
-    fetch('http://127.0.0.1:5001/api/cart')
+    fetch(`${BASE_URL}/cart`, {
+      headers: {
+        'ngrok-skip-browser-warning': 'true'
+      }
+    })
       .then(response => {
         if (!response.ok) {
           throw new Error('Network response was not ok');
@@ -26,11 +31,14 @@ export const CartProvider = ({ children }) => {
 
   const addToCart = async (newItem) => {
     try {
-      const response = await fetch('http://127.0.0.1:5001/api/cart/add', {
+      const response = await fetch(`${BASE_URL}/cart/add`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-        },
+          'ngrok-skip-browser-warning': 'true',
+        }, 
+
+        
         body: JSON.stringify(newItem),
       });
       const data = await response.json();
@@ -47,8 +55,11 @@ export const CartProvider = ({ children }) => {
 
   const removeFromCart = async (itemId) => {
     try {
-      const response = await fetch(`http://127.0.0.1:5001/api/cart/remove/${itemId}`, {
+      const response = await fetch(`${BASE_URL}/cart/remove/${itemId}`, {
         method: 'DELETE',
+        headers: {
+          'ngrok-skip-browser-warning': 'true'
+        }
       });
       if (response.ok) {
         fetchCartItems();
@@ -63,10 +74,11 @@ export const CartProvider = ({ children }) => {
 
   const updateQuantity = async (itemId, newQuantity) => {
     try {
-      const response = await fetch(`http://127.0.0.1:5001/api/cart/update/${itemId}`, {
+      const response = await fetch(`${BASE_URL}/cart/update/${itemId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'ngrok-skip-browser-warning': 'true',
         },
         body: JSON.stringify({ quantity: newQuantity }),
       });
@@ -83,9 +95,12 @@ export const CartProvider = ({ children }) => {
   // New clearCart function
   const clearCart = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:5001/api/cart/clear', {
-        method: 'DELETE',
-      });
+      const response = await fetch(`${BASE_URL}/cart/clear`, {
+        method: 'DELETE', 
+          headers: {
+            'ngrok-skip-browser-warning': 'true'
+          }
+        });
       if (response.ok) {
         setCartItems([]);
         localStorage.removeItem('cart');

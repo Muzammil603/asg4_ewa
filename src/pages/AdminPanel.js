@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
+import { BASE_URL } from './config';
 
 function AdminPanel() {
   const [products, setProducts] = useState([]);
@@ -24,7 +25,11 @@ function AdminPanel() {
   }, []);
 
   const fetchProducts = () => {
-    fetch('http://127.0.0.1:5001/api/products')
+    fetch(`${BASE_URL}/products`, {
+      headers: {
+        'ngrok-skip-browser-warning': 'true'
+      }
+    })
       .then(response => response.json())
       .then(data => setProducts(data))
       .catch(error => console.error('Error fetching products:', error));
@@ -67,10 +72,11 @@ function AdminPanel() {
       available_items: parseInt(formData.available_items) || 0
     };
   
-    fetch('http://127.0.0.1:5001/api/products/add', {
+    fetch(`${BASE_URL}/products/add`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 'true',
       },
       body: JSON.stringify(productData)
     })
@@ -102,8 +108,11 @@ function AdminPanel() {
   };
 
   const handleDeleteProduct = (productId) => {
-    fetch(`http://127.0.0.1:5001/api/products/delete/${productId}`, {
-      method: 'DELETE'
+    fetch(`${BASE_URL}/products/delete/${productId}`, {
+      method: 'DELETE',
+      headers: {
+        'ngrok-skip-browser-warning': 'true'
+      }
     })
       .then(response => response.json())
       .then(data => {
@@ -139,10 +148,11 @@ function AdminPanel() {
       }
     });
   
-    fetch(`http://127.0.0.1:5001/api/products/update/${selectedProduct.id}`, {
+    fetch(`${BASE_URL}/products/update/${selectedProduct.id}`, {
       method: 'PUT',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 'true',
       },
       body: JSON.stringify(updatedFormData)
     })

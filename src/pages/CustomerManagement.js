@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { BASE_URL } from './config';
 
 function CustomerManagement() {
   const [customers, setCustomers] = useState([]);
@@ -18,7 +19,11 @@ function CustomerManagement() {
   }, []);
 
   const loadCustomers = () => {
-    fetch('http://127.0.0.1:5001/api/customers')
+    fetch(`${BASE_URL}/customers`, {
+      headers: {
+        'ngrok-skip-browser-warning': 'true'
+      }
+    })
       .then(response => response.json())
       .then(data => setCustomers(data))
       .catch(error => console.error('Error fetching customers:', error));
@@ -32,8 +37,12 @@ function CustomerManagement() {
   };
 
   const handleDeleteCustomer = (customerId) => {
-    fetch(`http://127.0.0.1:5001/api/user/delete/${customerId}`, {
+    fetch(`${BASE_URL}/user/delete/${customerId}`, {
       method: 'DELETE',
+        headers: {
+          'ngrok-skip-browser-warning': 'true'
+        }
+      
     })
       .then(response => response.json())
       .then(data => {
@@ -63,10 +72,11 @@ function CustomerManagement() {
     e.preventDefault();
     if (selectedCustomer) {
       // Update existing customer
-      fetch(`http://127.0.0.1:5001/api/user/update/${selectedCustomer.id}`, {
+      fetch(`${BASE_URL}/user/update/${selectedCustomer.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'ngrok-skip-browser-warning': 'true',
         },
         body: JSON.stringify(formData),
       })
@@ -83,10 +93,11 @@ function CustomerManagement() {
         .catch(error => console.error('Error:', error));
     } else {
       // Add new customer
-      fetch('http://127.0.0.1:5001/api/register', {
+      fetch(`${BASE_URL}/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'ngrok-skip-browser-warning': 'true',
         },
         body: JSON.stringify(formData),
       })

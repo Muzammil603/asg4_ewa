@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { BASE_URL } from './config';
 
 function CustomerRegistration({ onSignUp }) {
   const [signUpData, setSignUpData] = useState({
@@ -21,10 +22,11 @@ function CustomerRegistration({ onSignUp }) {
 
   const handleSignUpSubmit = (e) => {
     e.preventDefault();
-    fetch('http://127.0.0.1:5001/api/register', {
+    fetch(`${BASE_URL}/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 'true',
       },
       body: JSON.stringify(signUpData),
     })

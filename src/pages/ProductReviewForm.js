@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { BASE_URL } from './config';
 
 const ProductReviewForm = () => {
   const [formData, setFormData] = useState({
@@ -32,8 +33,16 @@ const ProductReviewForm = () => {
     const fetchData = async () => {
       try {
         const [productsResponse, storeLocationsResponse] = await Promise.all([
-          axios.get('http://127.0.0.1:5001/api/products'),
-          axios.get('http://127.0.0.1:5001/api/store-locations')
+          axios.get(`${BASE_URL}/products`, {
+            headers: {
+              'ngrok-skip-browser-warning': 'true'
+            }
+          }),
+          axios.get(`${BASE_URL}/store-locations`, {
+            headers: {
+              'ngrok-skip-browser-warning': 'true'
+            }
+          })
         ]);
         setProducts(productsResponse.data);
         
@@ -86,7 +95,11 @@ const ProductReviewForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://127.0.0.1:5001/api/product-review', formData);
+      await axios.post(`${BASE_URL}/product-review`, formData, {
+        headers: {
+          'ngrok-skip-browser-warning': 'true'
+        }
+      });
       alert('Review submitted successfully!');
       setFormData({
         ProductModelName: '',

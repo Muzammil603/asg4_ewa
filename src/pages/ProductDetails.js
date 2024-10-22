@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import { CartContext } from '../context/CartContext';
+import { BASE_URL } from './config';
 
 function ProductDetails() {
   const { id: productId } = useParams();
@@ -12,7 +13,11 @@ function ProductDetails() {
   const [quantity, setQuantity] = useState(1);
 
   useEffect(() => {
-    fetch(`http://127.0.0.1:5001/api/products/${productId}`)
+    fetch(`${BASE_URL}/products/${productId}`, {
+      headers: {
+        'ngrok-skip-browser-warning': 'true'
+      }
+    })
       .then(response => response.json())
       .then(productData => {
         setProduct(productData);
@@ -91,7 +96,7 @@ function ProductDetails() {
     // Show success message
     alert('Product added to cart successfully!');
 
-    // fetch('http://127.0.0.1:5001/api/cart/add', {
+    // fetch('${BASE_URL}/cart/add', {
     //   method: 'POST',
     //   headers: {
     //     'Content-Type': 'application/json',

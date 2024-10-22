@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { BASE_URL } from './config';
 
 const Trending = () => {
   const [topLikedProducts, setTopLikedProducts] = useState([]);
@@ -12,9 +13,21 @@ const Trending = () => {
     const fetchTrendingData = async () => {
       try {
         const [likedProductsRes, zipCodesRes, soldProductsRes] = await Promise.all([
-          axios.get('http://127.0.0.1:5001/api/trending/liked-products'),
-          axios.get('http://127.0.0.1:5001/api/trending/zip-codes'),
-          axios.get('http://127.0.0.1:5001/api/trending/sold-products')
+          axios.get(`${BASE_URL}/trending/liked-products`, {
+            headers: {
+              'ngrok-skip-browser-warning': 'true'
+            }
+          }),
+          axios.get(`${BASE_URL}/trending/zip-codes`, {
+            headers: {
+              'ngrok-skip-browser-warning': 'true'
+            }
+          }),
+          axios.get(`${BASE_URL}/trending/sold-products`, {
+            headers: {
+              'ngrok-skip-browser-warning': 'true'
+            }
+          })
         ]);
 
         setTopLikedProducts(likedProductsRes.data);
